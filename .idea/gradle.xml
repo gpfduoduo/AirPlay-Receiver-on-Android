@@ -10,6 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/VitamioBundle-4" />
+            <option value="$PROJECT_DIR$/ZI-master" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>

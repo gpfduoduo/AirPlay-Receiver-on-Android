@@ -15,32 +15,34 @@ import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.ProtocolException;
+import org.apache.http.ProtocolVersion;
 import org.apache.http.UnsupportedHttpVersionException;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpExpectationVerifier;
 import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
 import org.apache.http.util.EncodingUtils;
-import org.apache.http.util.EntityUtils;
+
+import android.util.Log;
 
 
-/**
- * Created by guo.duoduo on 2015/8/24.
- */
-public class MyHttpService
+public class MyHTTPService
 {
+    private static final String tag = MyHTTPService.class.getSimpleName();
 
     private HttpParams params = null;
     private HttpProcessor processor = null;
     private HttpRequestHandlerResolver handlerResolver = null;
-    private ConnectionReuseStrategy connStrategy;
+    private ConnectionReuseStrategy connStrategy = null;
     private HttpResponseFactory responseFactory = null;
     private HttpExpectationVerifier expectationVerifier = null;
 
-    public MyHttpService(final HttpProcessor proc,
+    public MyHTTPService(final HttpProcessor proc,
             final ConnectionReuseStrategy connStrategy,
             final HttpResponseFactory responseFactory)
     {
@@ -101,83 +103,121 @@ public class MyHttpService
     public void handleRequest(final HttpServerConnection conn, final HttpContext context)
             throws IOException, HttpException
     {
-        context.setAttribute("http.connection", conn);
+        context.setAttribute(ExecutionContext.HTTP_CONNECTION, conn);
         HttpResponse response = null;
 
         try
         {
-            HttpRequest ex = conn.receiveRequestHeader();
+            HttpRequest request = conn.receiveRequestHeader();
+            request.setParams(new DefaultedHttpParams(request.getParams(), this.params));
 
-
-
-            if (ex instanceof HttpEntityEnclosingRequest)
+            String method = request.getRequestLine().getMethod();
+            Log.d(tag, "airplay in HTTpService, method = " + method);
+            if ("200".equals(method))
             {
-                if (((HttpEntityEnclosingRequest) ex).expectContinue())
+                Log.d(
+                    tag,
+                    "airplay in HTTPService, Receivce iOS HTTP reverse response 200 OK, do nothing just return");
+                return;
+            }
+            if (context.getAttribute("NO-RESP") != null)
+            {
+                Log.d(tag,
+                    "airplay in HTTPService, get /playback-info response this time!!");
+                context.removeAttribute("NO-RESP");
+                return;
+            }
+
+            ProtocolVersion ver = request.getRequestLine().getProtocolVersion();
+            if (!ver.lessEquals(HttpVersion.HTTP_1_1))
+            {
+                ver = HttpVersion.HTTP_1_1;
+            }
+
+            if (request instanceof HttpEntityEnclosingRequest)
+            {
+                if (((HttpEntityEnclosingRequest) request).expectContinue())
                 {
-                    response = this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_1,
-                        100, context);
+                    response = this.responseFactory.newHttpResponse(ver,
+                        HttpStatus.SC_CONTINUE, context);
+                    response.setParams(new DefaultedHttpParams(response.getParams(),
+                        this.params));
+
                     if (this.expectationVerifier != null)
                     {
                         try
                         {
-                            this.expectationVerifier.verify(ex, response, context);
+                            this.expectationVerifier.verify(request, response, context);
                         }
-                        catch (HttpException var6)
+                        catch (HttpException ex)
                         {
                             response = this.responseFactory.newHttpResponse(
-                                HttpVersion.HTTP_1_0, 500, context);
-                            this.handleException(var6, response);
+                                HttpVersion.HTTP_1_0,
+                                HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
+                            response.setParams(new DefaultedHttpParams(response
+                                    .getParams(), this.params));
+                            handleException(ex, response);
                         }
                     }
-
                     if (response.getStatusLine().getStatusCode() < 200)
                     {
                         conn.sendResponseHeader(response);
                         conn.flush();
                         response = null;
-                        conn.receiveRequestEntity((HttpEntityEnclosingRequest) ex);
+                        conn.receiveRequestEntity((HttpEntityEnclosingRequest) request);
                     }
                 }
                 else
                 {
-                    conn.receiveRequestEntity((HttpEntityEnclosingRequest) ex);
+                    conn.receiveRequestEntity((HttpEntityEnclosingRequest) request);
                 }
             }
 
-            context.setAttribute("http.request", ex);
             if (response == null)
             {
-                response = this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_1,
-                    200, context);
-                this.processor.process(ex, context);
-                this.doService(ex, response, context);
+                response = this.responseFactory.newHttpResponse(ver, HttpStatus.SC_OK,
+                    context);
+                response.setParams(new DefaultedHttpParams(response.getParams(),
+                    this.params));
+
+                context.setAttribute(ExecutionContext.HTTP_REQUEST, request);
+                context.setAttribute(ExecutionContext.HTTP_RESPONSE, response);
+
+                this.processor.process(request, context);
+                doService(request, response, context);
             }
 
-            if (ex instanceof HttpEntityEnclosingRequest)
+            // Make sure the request content is fully consumed
+            if (request instanceof HttpEntityEnclosingRequest)
             {
-                HttpEntity entity = ((HttpEntityEnclosingRequest) ex).getEntity();
-                EntityUtils.consume(entity);
+                HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
+                if (entity != null)
+                {
+                    entity.consumeContent();
+                }
             }
+
         }
-        catch (HttpException var7)
+        catch (HttpException ex)
         {
-            response = this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0, 500,
-                context);
-            this.handleException(var7, response);
+            response = this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0,
+                HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
+            response.setParams(new DefaultedHttpParams(response.getParams(), this.params));
+            handleException(ex, response);
         }
 
-        context.setAttribute("http.response", response);
         this.processor.process(response, context);
         conn.sendResponseHeader(response);
         conn.sendResponseEntity(response);
         conn.flush();
+
         if (!this.connStrategy.keepAlive(response, context))
         {
             conn.close();
         }
     }
 
-    protected void handleException(HttpException ex, HttpResponse response)
+    protected void handleException(final HttpException ex, final HttpResponse response)
     {
         if (ex instanceof MethodNotSupportedException)
         {
@@ -195,29 +235,25 @@ public class MyHttpService
         {
             response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
-
-        String message = ex.getMessage();
-        if (message == null)
-        {
-            message = ex.toString();
-        }
-
-        byte[] msg = EncodingUtils.getAsciiBytes(message);
+        byte[] msg = EncodingUtils.getAsciiBytes(ex.getMessage());
         ByteArrayEntity entity = new ByteArrayEntity(msg);
         entity.setContentType("text/plain; charset=US-ASCII");
         response.setEntity(entity);
     }
 
-    protected void doService(HttpRequest request, HttpResponse response,
-            HttpContext context) throws HttpException, IOException
+    protected void doService(final HttpRequest request, final HttpResponse response,
+            final HttpContext context) throws HttpException, IOException
     {
+        Log.d(tag, "airplay in HttpService doService");
         HttpRequestHandler handler = null;
         if (this.handlerResolver != null)
         {
             String requestURI = request.getRequestLine().getUri();
+
+            Log.d(tag, "airplay in http service, requestUri=" + requestURI);
+
             handler = this.handlerResolver.lookup(requestURI);
         }
-
         if (handler != null)
         {
             handler.handle(request, response, context);
@@ -226,6 +262,6 @@ public class MyHttpService
         {
             response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
         }
-
     }
+
 }

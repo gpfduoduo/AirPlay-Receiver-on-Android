@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AirPlay-Receiver-on-Android.iml" filepath="$PROJECT_DIR$/AirPlay-Receiver-on-Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/VitamioBundle-4/VitamioBundle-4.iml" filepath="$PROJECT_DIR$/VitamioBundle-4/VitamioBundle-4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ZI-master/ZI-master.iml" filepath="$PROJECT_DIR$/ZI-master/ZI-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
