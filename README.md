@@ -86,3 +86,9 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 ### 视频推送
   视频推送是通过优酷客户端进行的。
   ##未完待续
+  
+  
+##  感谢
+[![vitamio开源视频播放器]](https://www.vitamio.org/)   
+
+使用google最新的android studio更是方便，不像eclipse那样将vitamio作为library还需要搞一堆的res资源，在android manifest.xml中添加许多的类。android studio将其作为module，之后什么不需要，直接调用即可。
