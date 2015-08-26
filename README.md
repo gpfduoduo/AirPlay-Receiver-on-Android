@@ -31,14 +31,15 @@ airplay  incoming HTTP  method = PUT; target = /photo;
   
 
 
-推送第一张图片
+推送第一张图片  
+
 08-25 13:32:48.508  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = 78A1BB2D-5488-4372-95EA-FF32737B563C 缓存 左边  
 
 08-25 13:32:48.523  14608-15497/com.guo.duoduo.airplayreceiver D/MyLineParse
 08-25 13:32:48.568  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = F6BC486E-821B-4D74-B257-80AF280C6E5C 缓存 右边  
 
 08-25 13:32:48.725  14608-15497/com.guo.duoduo.airplayreceiver D/MyLineParser﹕
-08-25 13:32:48.752  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display image; assetKey = X-Apple-AssetKey: 8B792485-B6B6-4CF4-91D9-A14734E9E790 显示 当前  
+08-25 13:32:48.752  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display image; assetKey = X-Apple-AssetKey: 8B792485-B6B6-4CF4-91D9-A14734E9E790 显示 当前    
 
 
 
