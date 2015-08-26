@@ -83,6 +83,10 @@ airplay  incoming HTTP  method = PUT; target = /photo;
   结束推送的时候：
   
   airplay  incoming HTTP  method = POST; target = /stop 
+  
+### 推送效果
+以下为ipad推送，有时候会没有反应，具体还要查证
+![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/out.gif "结果展示图")
 ### 视频推送
   视频推送是通过优酷客户端进行的。
   ##未完待续
