@@ -49,6 +49,7 @@ import android.util.Log;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
+import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.BplistParser;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
 
@@ -61,23 +62,19 @@ public class RequestListenerThread extends Thread
     private static final String tag = RequestListenerThread.class.getSimpleName();
 
     private static final int port = 5000;
+    public static Map<String, byte[]> photoCacheMaps = Collections
+            .synchronizedMap(new HashMap<String, byte[]>());
+    protected static Map<String, Socket> socketMaps = Collections
+            .synchronizedMap(new HashMap<String, Socket>());
+    private static String localMac = null;
     private ServerSocket serversocket;
     private HttpParams params;
     private InetAddress localAddress;
     private MyHTTPService httpService;
-
     private JmDNS jmdns_airplay = null;
     private JmDNS jmdns_raop;
     private ServiceInfo airplay_service = null;
     private ServiceInfo raop_service;
-
-    private static String localMac = null;
-
-    protected static Map<String, Socket> socketMaps = Collections
-            .synchronizedMap(new HashMap<String, Socket>());
-
-    public static Map<String, byte[]> photoCacheMaps = Collections
-            .synchronizedMap(new HashMap<String, byte[]>());
 
     public RequestListenerThread() throws IOException
     {
@@ -389,10 +386,16 @@ public class RequestListenerThread extends Thread
 
             Header sessionHead = httpRequest.getFirstHeader("X-Apple-Session-ID");
             String sessionId = null;
+            //IOS 8.4.1 播放视频的时候 只有target为play的时候带有sessionId， 图片每一个命令都有sessionId
             if (sessionHead != null)
             {
                 sessionId = sessionHead.getValue();
                 httpContext.setAttribute(Constant.SessionId, sessionId);
+                Log.d(tag, "incoming HTTP airplay session id =" + sessionId);
+
+                Socket reverseSocket = currentConn.getCurrentSocket();
+                if (!socketMaps.containsKey(sessionId))
+                    socketMaps.put(sessionId, reverseSocket);
             }
 
             String requestBody = "";
@@ -422,10 +425,14 @@ public class RequestListenerThread extends Thread
 
                 if (null != sessionId)
                 {
-                    socketMaps.put(sessionId, reverseSocket);
-                    Log.d(tag, "airplay receive Reverse, keep Socket in HashMap, key="
-                        + sessionId + "; value=" + reverseSocket + ";total Map="
-                        + socketMaps);
+                    if (!socketMaps.containsKey(sessionId))
+                    {
+                        socketMaps.put(sessionId, reverseSocket);
+                        Log.d(tag,
+                            "airplay receive Reverse, keep Socket in HashMap, key="
+                                + sessionId + "; value=" + reverseSocket + ";total Map="
+                                + socketMaps);
+                    }
                 }
             }
             else if (target.equals(Constant.Target.SERVER_INFO))
@@ -440,9 +447,6 @@ public class RequestListenerThread extends Thread
             {
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.addHeader("Date", new Date().toString());
-                StringEntity body = new StringEntity("");
-                body.setContentType("text/html");
-                httpResponse.setEntity(body);
 
                 httpContext.setAttribute(Constant.Need_sendReverse,
                     Constant.Status.Status_stop);
@@ -458,9 +462,6 @@ public class RequestListenerThread extends Thread
             else if (target.equals(Constant.Target.PHOTO)) //推送的是图片
             {
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
-                StringEntity returnBody = new StringEntity("HTTP return 200 OK!", "UTF-8");
-                returnBody.setContentType("text/html");
-                httpResponse.setEntity(returnBody);
 
                 Message msg = Message.obtain();
                 msg.what = Constant.Msg.Msg_Photo;
@@ -541,8 +542,7 @@ public class RequestListenerThread extends Thread
                     playUrl = playUrl.trim();
                 }
 
-                Log.d(tag, "airplay playUrl = " + playUrl + "; start Pos ="
-                        + startPos);
+                Log.d(tag, "airplay playUrl = " + playUrl + "; start Pos =" + startPos);
 
                 Message msg = Message.obtain();
                 HashMap<String, String> map = new HashMap<String, String>();
@@ -553,24 +553,119 @@ public class RequestListenerThread extends Thread
                 MyApplication.getInstance().broadcastMessage(msg);
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
-                StringEntity returnBody = new StringEntity("HTTP return 200 OK!", "UTF-8");
-                returnBody.setContentType("text/html");
-                httpResponse.setEntity(returnBody);
 
                 // /send /event
-                httpContext.setAttribute(Constant.Need_sendReverse, Constant.Status.Status_play);
+                httpContext.setAttribute(Constant.Need_sendReverse,
+                    Constant.Status.Status_play);
                 httpContext.setAttribute(Constant.ReverseMsg,
-                        Constant.getEventMsg(1, sessionId, Constant.Status.Status_play));
+                    Constant.getEventMsg(1, sessionId, Constant.Status.Status_play));
             }
-            else if(target.equals(Constant.Target.SCRUB)) //获取当前播放的duration 和 position
+            else if (target.startsWith(Constant.Target.SCRUB)) //post 就是 seek操作，如果是get则是或者播放的position和duration
             {
                 StringEntity returnBody = new StringEntity("");
 
+                if (target.indexOf("?position=") > 0)
+                {//post方法
+                    int index = target.indexOf("?position=") + 10;
+                    float pos = new Float(target.substring(index));
+                    Log.d(tag, "airplay seek position =" + pos); //此时的单位是秒
+                    Message msg = Message.obtain();
+                    msg.what = Constant.Msg.Msg_Video_Seek;
+                    msg.obj = pos;
+                    MyApplication.getInstance().broadcastMessage(msg);
+                }
+                else
+                { //get方法
+                    long duration = 0;
+                    long curPos = 0;
+                    duration = VideoPlayerActivity.getDuration();
+                    curPos = VideoPlayerActivity.getCurrentPosition();
+                    duration = duration < 0 ? 0 : duration;
+                    Log.d(tag, "airplay get method scrub: duration=" + duration
+                        + "; position=" + curPos);
+                    //毫秒需要转为秒
+                    returnBody = new StringEntity("duration: " + duration / 1000f
+                        + "\r\nposition:" + curPos / 1000f, "UTF-8");
 
+                }
+                httpResponse.setHeader("Content-Type", "text/parameters");
+                httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.setEntity(returnBody);
             }
-            else if(target.equals(Constant.Target.RATE)) //设置播放的速率
+            else if (target.startsWith(Constant.Target.RATE)) //设置播放的速率
             {
+                int playState = Constant.Msg.Msg_Video_Resume;
+                String status = Constant.Status.Status_play;
+                if (target.indexOf("value=1") > 0) //正常速率播放
+                {
+                    playState = Constant.Msg.Msg_Video_Resume;
+                    status = Constant.Status.Status_play;
+                }
+                else if (target.indexOf("value=0") > 0) //暂停播放了
+                {
+                    playState = Constant.Msg.Msg_Video_Pause;
+                    status = Constant.Status.Status_pause;
+                }
 
+                Message msg = Message.obtain();
+                msg.what = playState;
+                MyApplication.getInstance().broadcastMessage(msg);
+                httpContext.setAttribute(Constant.Need_sendReverse, status);
+                httpContext.setAttribute(Constant.ReverseMsg,
+                        Constant.getEventMsg(1, sessionId, status));
+
+                httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.setHeader("Date", new Date().toString());
+            }
+            //IOS 8.4.1 从来不发 这个命令
+            else if (target.equalsIgnoreCase(Constant.Target.PLAYBACK_INFO))
+            {
+                String playback_info = "";
+                long duration = 0;
+                long cacheDuration = 0;
+                long curPos = 0;
+
+                String status = Constant.Status.Status_stop;
+
+                if (VideoPlayerActivity.isFinished())
+                {
+                    Log.d(tag, " airplay video activity is finished");
+                    status = Constant.Status.Status_stop;
+                }
+                else
+                {
+                    curPos = VideoPlayerActivity.getCurrentPosition();
+                    duration = VideoPlayerActivity.getDuration();
+                    cacheDuration = curPos
+                        + (long) (duration * VideoPlayerActivity.getBufferPercent() / 100);
+                    if (curPos == -1 || duration == -1 || cacheDuration == -1)
+                    {
+                        status = Constant.Status.Status_load;
+                        playback_info = Constant.getPlaybackInfo(0, 0, 0, 0); //
+                    }
+                    else
+                    {
+                        status = Constant.Status.Status_play;
+                        playback_info = Constant.getPlaybackInfo(duration / 1000f,
+                            cacheDuration / 1000f, curPos / 1000f, 1);
+                    }
+                }
+
+                httpContext.setAttribute(Constant.Need_sendReverse, status);
+                httpContext.setAttribute(Constant.ReverseMsg,
+                    Constant.getEventMsg(1, sessionId, status));
+
+                httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.addHeader("Date", new Date().toString());
+                httpResponse.addHeader("Content-Type", "text/x-apple-plist+xml");
+                httpResponse.setEntity(new StringEntity(playback_info));
+            }
+            else
+            {
+                httpResponse.setStatusCode(HttpStatus.SC_OK);
+                StringEntity body = new StringEntity("HTTP return 200 OK!", "UTF-8");
+                body.setContentType("text/html");
+                httpResponse.setEntity(body);
             }
         }
     }

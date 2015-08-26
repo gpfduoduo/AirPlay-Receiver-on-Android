@@ -14,7 +14,6 @@ public class Constant
     public static final String PlayURL = "playUrl";
     public static final String Start_Pos = "startPos";
 
-
     public interface Register
     {
         public static final int FAIL = -1;
@@ -26,6 +25,9 @@ public class Constant
         public static final int Msg_Photo = 1;
         public static final int Msg_Stop = 2;
         public static final int Msg_Video_Play = 3;
+        public static final int Msg_Video_Seek = 4;
+        public static final int Msg_Video_Pause = 5;
+        public static final int Msg_Video_Resume = 6;
     }
 
     public interface Target
@@ -37,8 +39,8 @@ public class Constant
         public static final String PLAY = "/play";
         public static final String SCRUB = "/scrub";
         public static final String RATE = "/rate";
+        public static final String PLAYBACK_INFO = "/playback-info";
     }
-
 
     public interface Status
     {
@@ -62,6 +64,7 @@ public class Constant
 
     /**
      * 服务器发送给客户端的event
+     * 
      * @param type 0 图片，1视频
      * @param sessionId
      * @param state
@@ -70,11 +73,11 @@ public class Constant
     public static String getEventMsg(int type, String sessionId, String state)
     {
         String category = "";
-        if(type == 0)
+        if (type == 0)
         {
             category = "photo";
         }
-        else if(type==1)
+        else if (type == 1)
         {
             category = "video";
         }
@@ -82,14 +85,66 @@ public class Constant
         String bodyStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
             + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>category</key>\n"
-            + "<string>"+ category + "</string>\n" + "<key>state</key>\n" + "<string>" + state
-            + "</string>\n" + "</dict>\n" + "</plist>\n";
+            + "<string>" + category + "</string>\n" + "<key>state</key>\n" + "<string>"
+            + state + "</string>\n" + "</dict>\n" + "</plist>\n";
 
         String sendMsg = "POST /event HTTP/1.1\r\n" + "X-Apple-Session-ID:" + sessionId
             + "\r\n" + "Content-Type: text/x-apple-plist+xml\r\n" + "Content-Length:"
             + bodyStr.length() + "\r\n\r\n" + bodyStr;
 
         return sendMsg;
+    }
+
+    public static String getPlaybackInfo(float duration, float cacheDuration,
+            float curPos, int playing)
+    {
+        String info = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n"
+            + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
+            + "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>duration</key>\n"
+            + "<real>"
+            + duration
+            + "</real>\n"
+            + "<key>loadedTimeRanges</key>\n"
+            + "<array>\n"
+            + "  <dict>\n"
+            + "  <key>duration</key>\n"
+            + "  <real>"
+            + cacheDuration
+            + "</real>\n"
+            + "  <key>start</key>\n"
+            + "  <real>0.0</real>\n"
+            + "  </dict>\n"
+            + "</array>\n"
+            + "<key>playbackBufferEmpty</key>\n"
+            + "<true/>\n"
+            + "<key>playbackBufferFull</key>\n"
+            + "<false/>\n"
+            + "<key>playbackLikelyToKeepUp</key>\n"
+            + "<true/>\n"
+            + "<key>position</key>\n"
+            + "<real>"
+            + curPos
+            + "</real>\n"
+            + "<key>rate</key>\n"
+            + "<real>"
+            + playing
+            + "</real>\n"
+            + "<key>readyToPlay</key>"
+            + "<true/>\n"
+            + "<key>seekableTimeRanges</key>\n"
+            + "<array>\n"
+            + "  <dict>\n"
+            + "  <key>duration</key>\n"
+            + "  <real>"
+            + duration
+            + "</real>\n"
+            + "  <key>start</key>\n"
+            + "  <real>0.0</real>\n"
+            + "  </dict>\n" + "</array>\n" + "</dict>\n" + "</plist>\n";
+
+        return info;
+
     }
 
 }

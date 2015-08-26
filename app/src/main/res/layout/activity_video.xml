@@ -9,12 +9,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical" >
 
-        <io.vov.vitamio.widget.VideoView
-            android:id="@+id/surface_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
+        <SurfaceView
+            android:id="@+id/surface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" >
+        </SurfaceView>
     </io.vov.vitamio.widget.CenterLayout>
 
 </LinearLayout>
