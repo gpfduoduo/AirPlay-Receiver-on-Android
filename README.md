@@ -19,14 +19,21 @@ airplay的服务发现是与M_DNS 和 DNS_SD协议的，目前开源的java实�
 ## 具体的协议分析
   简单的来说需要你的android 实现一个httpserver，然后apple设备（手机，pad）作为client将内容推送到你的server上，然后server（android）设备根据不同的内容进行显示，client（苹果）设备可以对推送的内容进行控制：推送下一张图片、视频的暂停、seek和推送结束等。
 
-### 对于图片
-  首先你会受到一个http get /server-info的请求
-  然后收到一个http post /reverse请求
-  最后就有收到 http put /photo请求，请求的http body中就含有实际的jpeg格式的图片二进制文件信息，在android中你decode就可以直接显示。
-  具体的日志如下：
-airplay  incoming HTTP  method = GET; target = /server-info; 
-airplay  incoming HTTP  method = POST; target = /reverse; 
-airplay  incoming HTTP  method = PUT; target = /photo; 
+### 对于图片  
+  首先你会受到一个http get /server-info的请求   
+  
+  然后收到一个http post /reverse请求  
+  
+  最后就有收到 http put /photo请求，请求的httpbody中就含有实际的jpeg格式的图片二进制文件信息，在android中你decode就可以直接显示。  
+  
+  具体的日志如下：  
+  
+airplay  incoming HTTP  method = GET; target = /server-info;   
+
+airplay  incoming HTTP  method = POST; target = /reverse;   
+
+airplay  incoming HTTP  method = PUT; target = /photo;    
+
   airplay推送图片的时候，会有一个缓存的操作，即：将缓存图片一并推送过来，这样可以较快的进行下一张图片的显示，提高用户体现。具体的第一次推送put /photo的时候，会推送三种图片，然后当你在apple客户端滑动显示图片的时候，会推送当前显示的一样和下一张的cache。具体的日志如下：
   
 
@@ -73,6 +80,9 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 
   而且每一个图片都对应这个一个 唯一的id：assetKey.
   
+  结束推送的时候：
+  
+  airplay  incoming HTTP  method = POST; target = /stop 
 ### 视频推送
   视频推送是通过优酷客户端进行的。
   ##未完待续
