@@ -31,9 +31,9 @@ import org.apache.http.util.EncodingUtils;
 import android.util.Log;
 
 
-public class MyHTTPService
+public class MyHttpService
 {
-    private static final String tag = MyHTTPService.class.getSimpleName();
+    private static final String tag = MyHttpService.class.getSimpleName();
 
     private HttpParams params = null;
     private HttpProcessor processor = null;
@@ -42,7 +42,7 @@ public class MyHTTPService
     private HttpResponseFactory responseFactory = null;
     private HttpExpectationVerifier expectationVerifier = null;
 
-    public MyHTTPService(final HttpProcessor proc,
+    public MyHttpService(final HttpProcessor proc,
             final ConnectionReuseStrategy connStrategy,
             final HttpResponseFactory responseFactory)
     {

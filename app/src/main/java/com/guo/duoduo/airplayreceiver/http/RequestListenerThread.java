@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -70,7 +68,7 @@ public class RequestListenerThread extends Thread
     private ServerSocket serversocket;
     private HttpParams params;
     private InetAddress localAddress;
-    private MyHTTPService httpService;
+    private MyHttpService httpService;
 
     public RequestListenerThread() throws IOException
     {
@@ -144,7 +142,7 @@ public class RequestListenerThread extends Thread
         //http请求处理程序，HttpFileHandler继承于HttpRequestHandler（http请求处理程序
         registry.register("*", new WebServiceHandler());
 
-        httpService = new MyHTTPService(httpProcessor,
+        httpService = new MyHttpService(httpProcessor,
             new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory());
         httpService.setParams(this.params);
         httpService.setHandlerResolver(registry);//为http服务设置注册好的请求处理器。
@@ -166,11 +164,11 @@ public class RequestListenerThread extends Thread
     {
         private static final String tag = WorkerThread.class.getSimpleName();
 
-        private final MyHTTPService httpService;
+        private final MyHttpService httpService;
         private final MyHttpServerConnection conn;
         private final Socket socket;
 
-        public WorkerThread(final MyHTTPService httpService,
+        public WorkerThread(final MyHttpService httpService,
                 final MyHttpServerConnection conn, final Socket socket)
         {
             super();
