@@ -32,7 +32,7 @@ public class ListenService extends Service
 {
     private static final String tag = ListenService.class.getSimpleName();
 
-    private static final String airplayName = "GuoDuoITV";
+    private static final String airplayName = "郭攀峰的Android实现";
     private MyController myController;
     private ServiceHandler handler;
 
