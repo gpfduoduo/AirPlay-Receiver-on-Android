@@ -16,6 +16,34 @@ aiplay是apple的东西，比较封闭，仅仅用于ihone（ipad）与apple自�
 ## 服务注册
 airplay的服务发现是与M_DNS 和 DNS_SD协议的，目前开源的java实现为jmdns，百度搜索即可。苹果视频和图片的推送服务名称为._airplay._tcp.local，airplay注册服务的时候需要用到。
 
+### 推送时显示自定义名称的方法
+具体的怎样在airplay推送的时候，在你的手机上看到的是你自己定义的名字呢？经过抓包分析，解决方案如下：
+音频raop服务和airplay的服务同时注册，并且注册的时候有一定的技巧，具体的代码如下所示：
+
+```JAVA
+ private void registerTcpLocal() throws IOException
+    {
+        airplayService = ServiceInfo.create(airplayName + "._airplay._tcp.local",
+            airplayName, RequestListenerThread.port, 0, 0, values);
+        jmdnsAirplay = JmDNS.create(localAddress);//create的必须绑定ip地址 android 4.0以上
+        jmdnsAirplay.registerService(airplayService);
+    }
+
+    private void registerRaopLocal() throws IOException
+    {
+        String raopName = preMac + "@" + airplayName;
+        raopService = ServiceInfo.create(raopName + "._raop._tcp.local", raopName,
+            RequestListenerThread.port - 1,
+            "tp=UDP sm=false sv=false ek=1 et=0,1 cn=0,1 ch=2 ss=16 "
+                + "sr=44100 pw=false vn=3 da=true md=0,1,2 vs=103.14 txtvers=1");
+        jmdnsRaop = JmDNS.create(localAddress);
+        jmdnsRaop.registerService(raopService);
+    }
+    ```
+如上面的代码:   
+airplayName就是你的自定义的名字，音频raop注册必须是mac@airplayName._raop._tcp.local, airplay注册必须是airplayName.    
+假如你的airplayName="我的电视"，则显示在你手机上的就是我的电视。   
+
 ## 具体的协议分析
   简单的来说需要你的android 实现一个httpserver，然后apple设备（手机，pad）作为client将内容推送到你的server上，然后server（android）设备根据不同的内容进行显示，client（苹果）设备可以对推送的内容进行控制：推送下一张图片、视频的暂停、seek和推送结束等。
 
@@ -33,7 +61,9 @@ airplay  incoming HTTP  method = GET; target = /server-info;
 airplay  incoming HTTP  method = POST; target = /reverse;   
 
 airplay  incoming HTTP  method = PUT; target = /photo;    
-
+而且每一个图片都对应这个一个 唯一的id：assetKey.
+  结束推送的时候：
+  airplay  incoming HTTP  method = POST; target = /stop 
 
   具体的忘了抓包如下所示：    
   收到请求Server基本信息的请求 必须返回相应内容
