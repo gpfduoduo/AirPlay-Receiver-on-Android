@@ -34,16 +34,17 @@ airplay  incoming HTTP  method = POST; target = /reverse;
 
 airplay  incoming HTTP  method = PUT; target = /photo;    
 
-  具体的忘了抓包如下所示：     
-  ![iamge](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20server-info.png)    
+
+  具体的忘了抓包如下所示：    
+  收到请求Server基本信息的请求 必须返回相应内容
+  ![iamge](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20server-info.png)    收到reverse请求
   ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20reverse.png)  
-  
+  接收到真正的图片数据：http body就是图片的二进制数据
   ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20put%20photo.png)  
-  
+  收到结束推送的消息
   ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20stop.png)   
   
   收到stop消息之后还要发送：  
-  
   ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20send%20reverse%20msg.png)  
   
   airplay推送图片的时候，会有一个缓存的操作，即：将缓存图片一并推送过来，这样可以较快的进行下一张图片的显示，提高用户体现。具体的第一次推送put /photo的时候，会推送三种图片，然后当你在apple客户端滑动显示图片的时候，会推送当前显示的一样和下一张的cache。具体的日志如下：
@@ -89,12 +90,6 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 08-25 13:47:06.468  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display cached image, assetKey = 8B792485-B6B6-4CF4-91D9-A14734E9E790  
 
 08-25 13:47:06.542  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = F6BC486E-821B-4D74-B257-80AF280C6E5C  
-
-  而且每一个图片都对应这个一个 唯一的id：assetKey.
-  
-  结束推送的时候：
-  
-  airplay  incoming HTTP  method = POST; target = /stop 
   
 ### 推送效果
 以下为ipad推送，有时候会没有反应，具体还要查证
