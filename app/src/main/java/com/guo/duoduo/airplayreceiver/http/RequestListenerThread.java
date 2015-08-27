@@ -55,13 +55,13 @@ import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
 
 
 /**
- * Created by guo.duoduo on 2015/8/24.
+ * Created by Guo.Duo duo on 2015/8/24.
  */
 public class RequestListenerThread extends Thread
 {
     private static final String tag = RequestListenerThread.class.getSimpleName();
 
-    private static final int port = 5000;
+    public  static final int port = 5000;
     public static Map<String, byte[]> photoCacheMaps = Collections
             .synchronizedMap(new HashMap<String, byte[]>());
     protected static Map<String, Socket> socketMaps = Collections
@@ -71,10 +71,6 @@ public class RequestListenerThread extends Thread
     private HttpParams params;
     private InetAddress localAddress;
     private MyHTTPService httpService;
-    private JmDNS jmdns_airplay = null;
-    private JmDNS jmdns_raop;
-    private ServiceInfo airplay_service = null;
-    private ServiceInfo raop_service;
 
     public RequestListenerThread() throws IOException
     {
@@ -83,23 +79,8 @@ public class RequestListenerThread extends Thread
 
     public void run()
     {
-        try
-        {
-            registerAirplay();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            Message msg = Message.obtain();
-            msg.what = Constant.Register.FAIL;
-            MyApplication.broadcastMessage(msg);
-            return;
-        }
-
-        Log.d(tag,
-            "airplay http server listen the port :  " + serversocket.getLocalPort());
-
         ExecutorService exec = Executors.newCachedThreadPool();
+
         while (!Thread.interrupted())
         {
             try
@@ -124,79 +105,25 @@ public class RequestListenerThread extends Thread
         exec.shutdown();
     }
 
-    private void registerAirplay() throws IOException
-    {
-        HashMap<String, String> values = new HashMap<String, String>();
-        String strMac = null;
-
-        InetAddress ia = NetworkUtils.getLocalIpAddress();//获取本地IP对象
-        String[] str_Array = new String[2];
-        try
-        {
-            str_Array = NetworkUtils.getMACAddress(ia);
-            strMac = str_Array[0];
-            localMac = strMac.toUpperCase(Locale.ENGLISH);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        Log.d(tag, "airplay 注册Airplay Mac地址：" + strMac);
-
-        values.put("deviceid", strMac);//修改为mac地址
-        values.put("features", "0x39f7"); //new Version iOS
-        values.put("model", "AppleTV2,1");//
-        values.put("srcvers", "130.14");
-        values.put("pw", "1");
-
-        String preMac = str_Array[1];
-        int tmpi = (int) (Math.random() * 100);
-
-        String name = preMac + "@airplay" + tmpi;
-
-        airplay_service = ServiceInfo.create(preMac + "@airplay" + tmpi
-            + "._airplay._tcp.local", name, this.port, 0, 0, values);
-
-        raop_service = ServiceInfo.create(preMac + "@airplay" + tmpi
-            + "._raop._tcp.local", name, this.port - 1,
-            "tp=UDP sm=false sv=false ek=1 et=0,1 cn=0,1 ch=2 ss=16 "
-                + "sr=44100 pw=false vn=3 da=true md=0,1,2 vs=103.14 txtvers=1");
-
-        jmdns_airplay = JmDNS.create(localAddress);//create的必须绑定ip地址 android 4.0以上
-        jmdns_airplay.registerService(airplay_service);
-
-        jmdns_raop = JmDNS.create(localAddress);
-        jmdns_raop.registerService(raop_service);
-
-        Log.d(tag, "airplay register airplay success");
-        Message msg = Message.obtain();
-        msg.what = Constant.Register.OK;
-        MyApplication.broadcastMessage(msg);
-    }
-
-    private void unregisterAirplay()
-    {
-        if (jmdns_airplay != null && jmdns_raop != null)
-        {
-            jmdns_raop.unregisterService(airplay_service);
-            jmdns_airplay.unregisterService(raop_service);
-            try
-            {
-                jmdns_airplay.close();
-                jmdns_raop.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private void initHttpServer() throws IOException
     {
         Log.d(tag, "airplay init http server");
 
         localAddress = NetworkUtils.getLocalIpAddress();
+
+        String[] str_Array = new String[2];
+        try
+        {
+            str_Array = NetworkUtils.getMACAddress(localAddress);
+            String strMac = str_Array[0];
+            localMac = strMac.toUpperCase(Locale.ENGLISH);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         serversocket = new ServerSocket(port, 20, localAddress);
 
         params = new BasicHttpParams();
@@ -225,21 +152,6 @@ public class RequestListenerThread extends Thread
 
     public void destroy()
     {
-        new Thread()
-        {
-            public void run()
-            {
-                try
-                {
-                    unregisterAirplay();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-
         try
         {
             this.serversocket.close();
@@ -295,6 +207,7 @@ public class RequestListenerThread extends Thread
                                 + sessionId);
 
                             sendReverseMsg(socket, httpMsg);
+
                             context.removeAttribute(Constant.Need_sendReverse);
                             context.removeAttribute(Constant.ReverseMsg);
 
@@ -302,11 +215,14 @@ public class RequestListenerThread extends Thread
                             {
                                 if (socket != null && !socket.isClosed())
                                 {
+                                    Log.d(tag, "airplay close socket");
                                     socket.close();
                                     socketMaps.remove(sessionId);
 
                                 }
                                 this.conn.shutdown();
+                                this.conn.close();
+                                this.interrupt();
                             }
                         }
                     }
@@ -325,6 +241,7 @@ public class RequestListenerThread extends Thread
                 try
                 {
                     this.conn.shutdown();
+                    this.conn.close();
                 }
                 catch (IOException e)
                 {
@@ -447,6 +364,9 @@ public class RequestListenerThread extends Thread
             {
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.addHeader("Date", new Date().toString());
+                StringEntity body = new StringEntity("");
+                body.setContentType("text/html");
+                httpResponse.setEntity(body);
 
                 httpContext.setAttribute(Constant.Need_sendReverse,
                     Constant.Status.Status_stop);
@@ -462,6 +382,9 @@ public class RequestListenerThread extends Thread
             else if (target.equals(Constant.Target.PHOTO)) //推送的是图片
             {
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
+                StringEntity returnBody = new StringEntity("HTTP return 200 OK!", "UTF-8");
+                returnBody.setContentType("text/html");
+                httpResponse.setEntity(returnBody);
 
                 Message msg = Message.obtain();
                 msg.what = Constant.Msg.Msg_Photo;
@@ -553,6 +476,9 @@ public class RequestListenerThread extends Thread
                 MyApplication.getInstance().broadcastMessage(msg);
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
+                StringEntity returnBody = new StringEntity("HTTP return 200 OK!", "UTF-8");
+                returnBody.setContentType("text/html");
+                httpResponse.setEntity(returnBody);
 
                 // /send /event
                 httpContext.setAttribute(Constant.Need_sendReverse,
@@ -612,7 +538,7 @@ public class RequestListenerThread extends Thread
                 MyApplication.getInstance().broadcastMessage(msg);
                 httpContext.setAttribute(Constant.Need_sendReverse, status);
                 httpContext.setAttribute(Constant.ReverseMsg,
-                        Constant.getEventMsg(1, sessionId, status));
+                    Constant.getEventMsg(1, sessionId, status));
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.setHeader("Date", new Date().toString());

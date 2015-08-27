@@ -1,7 +1,6 @@
 package com.guo.duoduo.airplayreceiver.ui;
 
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
@@ -17,7 +16,7 @@ import android.widget.TextView;
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
-import com.guo.duoduo.airplayreceiver.http.RequestListenerThread;
+import com.guo.duoduo.airplayreceiver.service.ListenService;
 
 
 public class MainActivity extends Activity
@@ -25,7 +24,7 @@ public class MainActivity extends Activity
     private AirplayServiceHandler handler;
     private TextView airplayStatusTxView;
     private WifiManager.MulticastLock multicastLock;
-    private RequestListenerThread thread;
+
     private MyController mController;
 
     @Override
@@ -40,21 +39,14 @@ public class MainActivity extends Activity
 
         initView();
         allowMulticastLock();//启动接收组播消息
-        startAirplay();
+
+        startListenService();
     }
 
-    private void startAirplay()
+    private void startListenService()
     {
-        try
-        {
-            thread = new RequestListenerThread();
-            thread.setDaemon(false);
-            thread.start();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        Intent intent = new Intent(getApplicationContext(), ListenService.class);
+        startService(intent);
     }
 
     private void initView()
@@ -70,9 +62,7 @@ public class MainActivity extends Activity
         handler.removeCallbacksAndMessages(null);
         mController.destroy();
         releaseMulticasLock();
-
-        if (thread != null)
-            thread.destroy();
+        stopService(new Intent(getApplicationContext(), ListenService.class));
     }
 
     private void allowMulticastLock()
@@ -127,7 +117,7 @@ public class MainActivity extends Activity
 
                 case Constant.Msg.Msg_Video_Play :
                 {
-                    HashMap<String, String> map = (HashMap)msg.obj;
+                    HashMap<String, String> map = (HashMap) msg.obj;
                     String playUrl = map.get(Constant.PlayURL);
                     String startPos = map.get(Constant.Start_Pos);
 

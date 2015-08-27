@@ -117,7 +117,7 @@ public class MyHTTPService
             {
                 Log.d(
                     tag,
-                    "airplay in HTTPService, Receivce iOS HTTP reverse response 200 OK, do nothing just return");
+                    "airplay in HTTPService, Receive iOS HTTP reverse response 200 OK, do nothing just return");
                 return;
             }
             if (context.getAttribute("NO-RESP") != null)
