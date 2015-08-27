@@ -34,6 +34,18 @@ airplay  incoming HTTP  method = POST; target = /reverse;
 
 airplay  incoming HTTP  method = PUT; target = /photo;    
 
+  具体的忘了抓包如下所示：     
+  ![iamge](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20server-info.png)    
+  ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20reverse.png)  
+  
+  ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20put%20photo.png)  
+  
+  ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20stop.png)   
+  
+  收到stop消息之后还要发送：  
+  
+  ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/airplay%20photo%20send%20reverse%20msg.png)  
+  
   airplay推送图片的时候，会有一个缓存的操作，即：将缓存图片一并推送过来，这样可以较快的进行下一张图片的显示，提高用户体现。具体的第一次推送put /photo的时候，会推送三种图片，然后当你在apple客户端滑动显示图片的时候，会推送当前显示的一样和下一张的cache。具体的日志如下：
   
 
