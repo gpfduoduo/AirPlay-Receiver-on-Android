@@ -39,7 +39,8 @@ airplay的服务发现是与M_DNS 和 DNS_SD协议的，目前开源的java实�
         jmdnsRaop = JmDNS.create(localAddress);
         jmdnsRaop.registerService(raopService);
     }
-    ```
+```
+
 如上面的代码:   
 airplayName就是你的自定义的名字，音频raop注册必须是mac@airplayName._raop._tcp.local, airplay注册必须是airplayName.    
 假如你的airplayName="我的电视"，则显示在你手机上的就是我的电视。   
