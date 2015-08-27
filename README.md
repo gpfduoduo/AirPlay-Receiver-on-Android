@@ -43,7 +43,8 @@ airplay的服务发现是与M_DNS 和 DNS_SD协议的，目前开源的java实�
 
 如上面的代码:   
 airplayName就是你的自定义的名字，音频raop注册必须是mac@airplayName._raop._tcp.local, airplay注册必须是airplayName.    
-假如你的airplayName="我的电视"，则显示在你手机上的就是我的电视。   
+假如你的airplayName="我的电视"，则显示在你手机上的就是我的电视。  
+![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/protocol/show%20self%20define%20name.png)
 
 ## 具体的协议分析
   简单的来说需要你的android 实现一个httpserver，然后apple设备（手机，pad）作为client将内容推送到你的server上，然后server（android）设备根据不同的内容进行显示，client（苹果）设备可以对推送的内容进行控制：推送下一张图片、视频的暂停、seek和推送结束等。
