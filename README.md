@@ -2,11 +2,11 @@
 在Android中实现Airplay的接收端
 
 ## 目前实现的功能
-1、iphone 推送图片到android，支持上一张、下一张
-2、iphone中的优酷播放器通过airplay推送视频到android，支持暂停、播放、seek和在随意时间点推送播放
-3当android客户端推出播放后，ipone就退出airplay模式。
-4、airplay发现android设备，你可以随便修改自己的名称，例如显示：我的电视 等
-5、视频播放时，android和ipone是同步的，时间一致。
+1、iphone 推送图片到android，支持上一张、下一张  
+2、iphone中的优酷播放器通过airplay推送视频到android，支持暂停、播放、seek和在随意时间点推送播放  
+3当android客户端推出播放后，ipone就退出airplay模式。  
+4、airplay发现android设备，你可以随便修改自己的名称，例如显示：我的电视 等  
+5、视频播放时，android和ipone是同步的，时间一致。  
 
 # 项目介绍
 目前是移动互联网的时代，小屏幕已经占领了我们生活的大部分时间，然而在家庭内的另一个屏幕就是电视屏幕，如果让两个屏幕连接起来，
