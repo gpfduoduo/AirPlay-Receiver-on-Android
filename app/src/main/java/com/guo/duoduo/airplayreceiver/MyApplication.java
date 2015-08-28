@@ -18,6 +18,8 @@ public class MyApplication extends Application
 
     private ConcurrentHashMap<String, Handler> mHandlerMap = new ConcurrentHashMap<String, Handler>();
 
+    private boolean isVideoFinished = false;
+
     @Override
     public void onCreate()
     {
@@ -43,4 +45,13 @@ public class MyApplication extends Application
         }
     }
 
+    public boolean isVideoActivityFinished()
+    {
+        return isVideoFinished;
+    }
+
+    public void setVideoActivityFinish(boolean finished)
+    {
+        this.isVideoFinished = finished;
+    }
 }

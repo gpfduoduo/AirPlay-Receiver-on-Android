@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
@@ -42,7 +43,7 @@ public class VideoPlayerActivity extends Activity
     private SurfaceView mPreview;
     private SurfaceHolder holder;
     private String mPath;
-    private Double position;
+    private double position;
     private boolean mIsVideoSizeKnown = false;
     private boolean mIsVideoReadyToBePlayed = false;
 
@@ -69,6 +70,8 @@ public class VideoPlayerActivity extends Activity
         holder = mPreview.getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.RGBA_8888);
+
+        MyApplication.getInstance().setVideoActivityFinish(false);
 
     }
 
@@ -110,11 +113,6 @@ public class VideoPlayerActivity extends Activity
         }
         else
             return 0;
-    }
-
-    public static boolean isFinished()
-    {
-        return isFinished();
     }
 
     private void playVideo()
@@ -218,8 +216,8 @@ public class VideoPlayerActivity extends Activity
         super.onDestroy();
         releaseMediaPlayer();
         doCleanUp();
-        handler.removeCallbacksAndMessages(null);
         controller.destroy();
+        MyApplication.getInstance().setVideoActivityFinish(true);
     }
 
     private void releaseMediaPlayer()
@@ -244,6 +242,9 @@ public class VideoPlayerActivity extends Activity
         Log.v(tag, "startVideoPlayback");
         holder.setFixedSize(mVideoWidth, mVideoHeight);
         mMediaPlayer.start();
+        //实现端断点许序播
+        long pos = (long)(mMediaPlayer.getDuration() * position);
+        mMediaPlayer.seekTo(pos);
     }
 
     private static class VideoHandler extends Handler

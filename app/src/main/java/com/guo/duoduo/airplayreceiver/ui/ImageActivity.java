@@ -84,7 +84,6 @@ public class ImageActivity extends Activity
     public void onDestroy()
     {
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
         RequestListenerThread.photoCacheMaps.clear();
         mController.destroy();
     }

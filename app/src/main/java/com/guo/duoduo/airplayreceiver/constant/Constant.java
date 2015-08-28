@@ -70,24 +70,29 @@ public class Constant
      * @param state
      * @return
      */
-    public static String getEventMsg(int type, String sessionId, String state)
+    public static String getStopEventMsg(int type, String sessionId, String state)
     {
         String category = "";
+        String bodyStr = "";
         if (type == 0)
         {
             category = "photo";
+            bodyStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+                + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>category</key>\n"
+                + "<string>" + category + "</string>\n" + "<key>reason</key>\n"
+                + "<string>ended</string>\n" + "<key>state</key>\n" + "<string>" + state
+                + "</string>\n" + "</dict>\n" + "</plist>\n";
         }
         else if (type == 1)
         {
             category = "video";
+            bodyStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+                + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>category</key>\n"
+                + "<string>" + category + "</string>\n" + "<key>state</key>\n"
+                + "<string>" + state + "</string>\n" + "</dict>\n" + "</plist>\n";
         }
-
-        String bodyStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>category</key>\n"
-            + "<string>" + category + "</string>\n" + "<key>reason</key>\n"
-            + "<string>ended</string>\n" + "<key>state</key>\n" + "<string>" + state
-            + "</string>\n" + "</dict>\n" + "</plist>\n";
 
         String sendMsg = "POST /event HTTP/1.1\r\n" + "X-Apple-Session-ID:" + sessionId
             + "\r\n" + "Content-Type: text/x-apple-plist+xml\r\n" + "Content-Length:"

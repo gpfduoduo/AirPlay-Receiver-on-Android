@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +14,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -59,7 +59,7 @@ public class RequestListenerThread extends Thread
 {
     private static final String tag = RequestListenerThread.class.getSimpleName();
 
-    public  static final int port = 5000;
+    public static final int port = 5000;
     public static Map<String, byte[]> photoCacheMaps = Collections
             .synchronizedMap(new HashMap<String, byte[]>());
     protected static Map<String, Socket> socketMaps = Collections
@@ -102,7 +102,6 @@ public class RequestListenerThread extends Thread
         }
         exec.shutdown();
     }
-
 
     private void initHttpServer() throws IOException
     {
@@ -216,7 +215,6 @@ public class RequestListenerThread extends Thread
                                     Log.d(tag, "airplay close socket");
                                     socket.close();
                                     socketMaps.remove(sessionId);
-
                                 }
                                 this.conn.shutdown();
                                 this.conn.close();
@@ -269,6 +267,10 @@ public class RequestListenerThread extends Thread
         }
     }
 
+    /**
+     * all the protocol interactions between apple client (iphone ipad) and
+     * Android device are processed here
+     */
     private static class WebServiceHandler implements HttpRequestHandler
     {
         private static final String tag = WebServiceHandler.class.getSimpleName();
@@ -300,7 +302,7 @@ public class RequestListenerThread extends Thread
                 + target + "; contentType = " + contentType);
 
             Header sessionHead = httpRequest.getFirstHeader("X-Apple-Session-ID");
-            String sessionId = null;
+            String sessionId = "";
             //IOS 8.4.1 播放视频的时候 只有target为play的时候带有sessionId， 图片每一个命令都有sessionId
             if (sessionHead != null)
             {
@@ -362,14 +364,11 @@ public class RequestListenerThread extends Thread
             {
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.addHeader("Date", new Date().toString());
-                StringEntity body = new StringEntity("");
-                body.setContentType("text/html");
-                httpResponse.setEntity(body);
 
                 httpContext.setAttribute(Constant.Need_sendReverse,
                     Constant.Status.Status_stop);
                 httpContext.setAttribute(Constant.ReverseMsg,
-                    Constant.getEventMsg(0, sessionId, Constant.Status.Status_stop));
+                    Constant.getStopEventMsg(0, sessionId, Constant.Status.Status_stop));
 
                 Message msg = Message.obtain();
                 msg.what = Constant.Msg.Msg_Stop;
@@ -474,15 +473,15 @@ public class RequestListenerThread extends Thread
                 MyApplication.getInstance().broadcastMessage(msg);
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
-                StringEntity returnBody = new StringEntity("HTTP return 200 OK!", "UTF-8");
-                returnBody.setContentType("text/html");
-                httpResponse.setEntity(returnBody);
+                httpResponse.setHeader("Date", new Date().toString());
 
-                // /send /event
-                httpContext.setAttribute(Constant.Need_sendReverse,
-                    Constant.Status.Status_play);
-                httpContext.setAttribute(Constant.ReverseMsg,
-                    Constant.getEventMsg(1, sessionId, Constant.Status.Status_play));
+                /*
+                 * httpContext.setAttribute(Constant.Need_sendReverse,
+                 * Constant.Status.Status_play);
+                 * httpContext.setAttribute(Constant.ReverseMsg,
+                 * Constant.getEventMsg(1, sessionId,
+                 * Constant.Status.Status_play));
+                 */
             }
             else if (target.startsWith(Constant.Target.SCRUB)) //post 就是 seek操作，如果是get则是或者播放的position和duration
             {
@@ -499,21 +498,41 @@ public class RequestListenerThread extends Thread
                     MyApplication.getInstance().broadcastMessage(msg);
                 }
                 else
-                { //get方法
+                { //get方法 获取播放的duration and position
                     long duration = 0;
                     long curPos = 0;
                     duration = VideoPlayerActivity.getDuration();
                     curPos = VideoPlayerActivity.getCurrentPosition();
                     duration = duration < 0 ? 0 : duration;
+                    curPos = curPos < 0 ? 0 : curPos;
                     Log.d(tag, "airplay get method scrub: duration=" + duration
                         + "; position=" + curPos);
-                    //毫秒需要转为秒
-                    returnBody = new StringEntity("duration: " + duration / 1000f
-                        + "\r\nposition:" + curPos / 1000f, "UTF-8");
 
+                    if (!MyApplication.getInstance().isVideoActivityFinished())
+                    {
+                        //毫秒需要转为秒
+                        DecimalFormat decimalFormat = new DecimalFormat(".000000");//
+                        String strDuration = decimalFormat.format(duration / 1000f);
+                        String strCurPos = decimalFormat.format(curPos / 1000f);
+
+                        //must have space, duration: **.******, or else, apple client can not syn with android
+                        String returnStr = "duration: " + strDuration + "\nposition: "
+                            + strCurPos;
+                        Log.d(tag, "airplay return scrub message = " + returnStr);
+                        returnBody = new StringEntity(returnStr, "UTF-8");
+                    }
+                    else //播放视频的界面退出后，手机端也要退出
+                    {
+                        httpContext.setAttribute(Constant.Need_sendReverse,
+                            Constant.Status.Status_stop);
+                        httpContext.setAttribute(Constant.ReverseMsg, Constant
+                                .getStopEventMsg(1, sessionId,
+                                    Constant.Status.Status_stop));
+                    }
                 }
-                httpResponse.setHeader("Content-Type", "text/parameters");
+
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.setHeader("Date", new Date().toString());
                 httpResponse.setEntity(returnBody);
             }
             else if (target.startsWith(Constant.Target.RATE)) //设置播放的速率
@@ -534,9 +553,12 @@ public class RequestListenerThread extends Thread
                 Message msg = Message.obtain();
                 msg.what = playState;
                 MyApplication.getInstance().broadcastMessage(msg);
-                httpContext.setAttribute(Constant.Need_sendReverse, status);
-                httpContext.setAttribute(Constant.ReverseMsg,
-                    Constant.getEventMsg(1, sessionId, status));
+
+                /*
+                 * httpContext.setAttribute(Constant.Need_sendReverse, status);
+                 * httpContext.setAttribute(Constant.ReverseMsg,
+                 * Constant.getEventMsg(1, sessionId, status));
+                 */
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.setHeader("Date", new Date().toString());
@@ -551,7 +573,7 @@ public class RequestListenerThread extends Thread
 
                 String status = Constant.Status.Status_stop;
 
-                if (VideoPlayerActivity.isFinished())
+                if (MyApplication.getInstance().isVideoActivityFinished())
                 {
                     Log.d(tag, " airplay video activity is finished");
                     status = Constant.Status.Status_stop;
@@ -575,9 +597,11 @@ public class RequestListenerThread extends Thread
                     }
                 }
 
-                httpContext.setAttribute(Constant.Need_sendReverse, status);
-                httpContext.setAttribute(Constant.ReverseMsg,
-                    Constant.getEventMsg(1, sessionId, status));
+                /*
+                 * httpContext.setAttribute(Constant.Need_sendReverse, status);
+                 * httpContext.setAttribute(Constant.ReverseMsg,
+                 * Constant.getEventMsg(1, sessionId, status));
+                 */
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.addHeader("Date", new Date().toString());
@@ -586,10 +610,7 @@ public class RequestListenerThread extends Thread
             }
             else
             {
-                httpResponse.setStatusCode(HttpStatus.SC_OK);
-                StringEntity body = new StringEntity("HTTP return 200 OK!", "UTF-8");
-                body.setContentType("text/html");
-                httpResponse.setEntity(body);
+                Log.d(tag, "airplay default not process");
             }
         }
     }

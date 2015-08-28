@@ -59,7 +59,6 @@ public class MainActivity extends Activity
     public void onDestroy()
     {
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
         mController.destroy();
         releaseMulticasLock();
         stopService(new Intent(getApplicationContext(), ListenService.class));
@@ -110,7 +109,6 @@ public class MainActivity extends Activity
                     byte[] pic = (byte[]) msg.obj;
                     Intent intent = new Intent(activity, ImageActivity.class);
                     intent.putExtra("picture", pic);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     activity.startActivity(intent);
                     break;
                 }
@@ -124,7 +122,6 @@ public class MainActivity extends Activity
                     Intent intent = new Intent(activity, VideoPlayerActivity.class);
                     intent.putExtra("path", playUrl);
                     intent.putExtra("position", Double.valueOf(startPos));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     activity.startActivity(intent);
                     break;
                 }
