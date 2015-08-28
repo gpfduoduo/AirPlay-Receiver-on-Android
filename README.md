@@ -1,6 +1,13 @@
 # AirPlay-Receiver-on-Android
 在Android中实现Airplay的接收端
 
+## 目前实现的功能
+1、iphone 推送图片到android，支持上一张、下一张
+2、iphone中的优酷播放器通过airplay推送视频到android，支持暂停、播放、seek和在随意时间点推送播放
+3当android客户端推出播放后，ipone就退出airplay模式。
+4、airplay发现android设备，你可以随便修改自己的名称，例如显示：我的电视 等
+5、视频播放时，android和ipone是同步的，时间一致。
+
 # 项目介绍
 目前是移动互联网的时代，小屏幕已经占领了我们生活的大部分时间，然而在家庭内的另一个屏幕就是电视屏幕，如果让两个屏幕连接起来，
 几年前已经成为了一个热门的话题（最近似乎不是很热了），但是如何占领家庭内部的市场仍是一个重点和热点，如近期出现的智能路由器。
@@ -126,12 +133,19 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 ### 推送效果
 以下为ipad推送，有时候会没有反应，具体还要查证
 ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/out.gif "结果展示图")
+
 ### 视频推送
   视频推送是通过优酷客户端进行的。
-  ##未完待续
+#### 与之前的研究不同的地方
+1、推送视频的时候，目前IOS8.4.1不发送 "/playback-info" 请求了。
+2、在你播放时的结束的地方，要通过reverse的socket发送stop状态给iphone，这样你android推出，iphone才能推出airplay模式
+3、iphone向你请求播放时间和长度的时候，你返回如下格式
+  ```JAVA
+   "duration: " + strDuration + "\nposition: " + strCurPos
+  ```
+  记住duration:之后有一个空格，否则iphone 进入 airplay模式，时间就不东了，不会和android播放, 具体的参考代码。
   
   
-##  感谢
-[![vitamio开源视频播放器]](https://www.vitamio.org/)   
-
-使用google最新的android studio更是方便，不像eclipse那样将vitamio作为library还需要搞一堆的res资源，在android manifest.xml中添加许多的类。android studio将其作为module，之后什么不需要，直接调用即可。
+##  感谢与推荐
+1 源视频播放器]](https://www.vitamio.org/)   
+2 使用google最新的android studio更是方便，不像eclipse那样将vitamio作为library还需要搞一堆的res资源，在android manifest.xml中添加许多的类。android studio将其作为module，之后什么不需要，直接调用即可。
