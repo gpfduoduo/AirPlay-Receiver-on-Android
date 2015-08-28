@@ -135,15 +135,16 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/out.gif "结果展示图")
 
 ### 视频推送
-  视频推送是通过优酷客户端进行的。
+  视频推送是通过优酷客户端进行的。   
 #### 与之前的研究不同的地方
-1、推送视频的时候，目前IOS8.4.1不发送 "/playback-info" 请求了。
-2、在你播放时的结束的地方，要通过reverse的socket发送stop状态给iphone，这样你android推出，iphone才能推出airplay模式
-3、iphone向你请求播放时间和长度的时候，你返回如下格式
+1、推送视频的时候，目前IOS8.4.1不发送 "/playback-info" 请求了。    
+2、在你播放时的结束的地方，要通过reverse的socket发送stop状态给iphone，这样你android推出，iphone才能推出airplay模式    
+3、iphone向你请求播放时间和长度的时候，你返回如下格式    
+
   ```JAVA
    "duration: " + strDuration + "\nposition: " + strCurPos
   ```
-  记住duration:之后有一个空格，否则iphone 进入 airplay模式，时间就不东了，不会和android播放, 具体的参考代码。
+  记住duration:之后有一个空格，否则iphone 进入 airplay模式，时间就不东了，不会和android播放, 具体的参考代码。  
   
   
 ##  感谢与推荐
