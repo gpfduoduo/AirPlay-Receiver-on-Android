@@ -149,7 +149,7 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 待添加。
 
 #### 推送效果
-gif图有点大需要等待。
+gif图有点大需要等待。     
 ![image](https://github.com/gpfduoduo/AirPlay-Receiver-on-Android/blob/master/push_video.gif "推送视频")
 
 ##  感谢与推荐
