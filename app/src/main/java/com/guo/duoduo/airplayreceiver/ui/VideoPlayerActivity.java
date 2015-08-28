@@ -216,7 +216,8 @@ public class VideoPlayerActivity extends Activity
         super.onDestroy();
         releaseMediaPlayer();
         doCleanUp();
-        controller.destroy();
+        if (controller != null)
+            controller.destroy();
         MyApplication.getInstance().setVideoActivityFinish(true);
     }
 
@@ -243,7 +244,7 @@ public class VideoPlayerActivity extends Activity
         holder.setFixedSize(mVideoWidth, mVideoHeight);
         mMediaPlayer.start();
         //实现端断点许序播
-        long pos = (long)(mMediaPlayer.getDuration() * position);
+        long pos = (long) (mMediaPlayer.getDuration() * position);
         mMediaPlayer.seekTo(pos);
     }
 
