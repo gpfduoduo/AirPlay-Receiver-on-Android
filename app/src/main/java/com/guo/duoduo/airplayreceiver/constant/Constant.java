@@ -7,7 +7,6 @@ package com.guo.duoduo.airplayreceiver.constant;
 public class Constant
 {
 
-    public static final String SessionId = "X_Apple_Reverse_sessionId";
     public static final String Need_sendReverse = "SendReverse";
     public static final String ReverseMsg = "ReverseMsg";
 

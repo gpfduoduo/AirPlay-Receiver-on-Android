@@ -191,7 +191,14 @@ public class RequestListenerThread extends Thread
 
                     String needSendReverse = (String) context
                             .getAttribute(Constant.Need_sendReverse);
-                    String sessionId = (String) context.getAttribute(Constant.SessionId);
+                    if (socketMaps.size() != 1)
+                        continue;
+
+                    String sessionId = (String) socketMaps.entrySet().iterator().next()
+                            .getKey();
+                    Log.d(tag, "airplay need send reverse = " + needSendReverse
+                        + "; sessionId = " + sessionId);
+
                     if (needSendReverse != null && sessionId != null)
                     {
                         if (socketMaps.containsKey(sessionId))
@@ -217,7 +224,6 @@ public class RequestListenerThread extends Thread
                                     socketMaps.clear();
                                 }
                                 this.conn.shutdown();
-                                this.conn.close();
                                 this.interrupt();
                             }
                         }
@@ -237,7 +243,6 @@ public class RequestListenerThread extends Thread
                 try
                 {
                     this.conn.shutdown();
-                    this.conn.close();
                 }
                 catch (IOException e)
                 {
@@ -305,15 +310,23 @@ public class RequestListenerThread extends Thread
             String sessionId = "";
 
             //IOS 8.4.1 播放视频的时候 只有target为play的时候带有sessionId， 图片每一个命令都有sessionId
+
             if (sessionHead != null)
             {
                 sessionId = sessionHead.getValue();
-                httpContext.setAttribute(Constant.SessionId, sessionId);
                 Log.d(tag, "incoming HTTP airplay session id =" + sessionId);
 
-                Socket reverseSocket = currentConn.getCurrentSocket();
-                if (!socketMaps.containsKey(sessionId))
-                    socketMaps.put(sessionId, reverseSocket);
+                if (target.equals(Constant.Target.REVERSE)
+                    || target.equals(Constant.Target.PLAY))
+                {
+                    socketMaps.clear();
+                    Socket reverseSocket = currentConn.getCurrentSocket();
+                    if (!socketMaps.containsKey(sessionId))
+                    {
+                        socketMaps.put(sessionId, reverseSocket);
+                        Log.d(tag, "airplay add sock to maps");
+                    }
+                }
             }
 
             String requestBody = "";
@@ -380,6 +393,7 @@ public class RequestListenerThread extends Thread
             else if (target.equals(Constant.Target.PHOTO)) //推送的是图片
             {
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.setHeader("Date", new Date().toString());
 
                 Message msg = Message.obtain();
                 msg.what = Constant.Msg.Msg_Photo;
@@ -472,12 +486,6 @@ public class RequestListenerThread extends Thread
 
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.setHeader("Date", new Date().toString());
-
-//                httpContext.setAttribute(Constant.Need_sendReverse,
-//                    Constant.Status.Status_play);
-//                httpContext.setAttribute(Constant.ReverseMsg,
-//                    Constant.getVideoEventMsg(sessionId, Constant.Status.Status_play));
-
             }
             else if (target.startsWith(Constant.Target.SCRUB)) //post 就是 seek操作，如果是get则是或者播放的position和duration
             {
@@ -517,7 +525,8 @@ public class RequestListenerThread extends Thread
                         Log.d(tag, "airplay return scrub message = " + returnStr);
                         returnBody = new StringEntity(returnStr, "UTF-8");
                     }
-                    else //播放视频的界面退出后，手机端也要退出
+                    else
+                    //播放视频的界面退出后，手机端也要退出
                     {
                         httpContext.setAttribute(Constant.Need_sendReverse,
                             Constant.Status.Status_stop);
@@ -550,10 +559,6 @@ public class RequestListenerThread extends Thread
                 msg.what = playState;
                 MyApplication.getInstance().broadcastMessage(msg);
 
-//                httpContext.setAttribute(Constant.Need_sendReverse, status);
-//                httpContext.setAttribute(Constant.ReverseMsg,
-//                    Constant.getVideoEventMsg(sessionId, status));
-
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.setHeader("Date", new Date().toString());
             }
@@ -561,46 +566,6 @@ public class RequestListenerThread extends Thread
             else if (target.equalsIgnoreCase(Constant.Target.PLAYBACK_INFO))
             {
                 Log.d(tag, "airplay received playback_info request");
-
-                //                String playback_info = "";
-                //                long duration = 0;
-                //                long cacheDuration = 0;
-                //                long curPos = 0;
-                //
-                //                String status = Constant.Status.Status_stop;
-                //
-                //                if (VideoPlayerActivity.isVideoActivityFinished())
-                //                {
-                //                    Log.d(tag, " airplay video activity is finished");
-                //                    status = Constant.Status.Status_stop;
-                //
-                //                    httpContext.setAttribute(Constant.Need_sendReverse, status);
-                //                    httpContext.setAttribute(Constant.ReverseMsg,
-                //                            Constant.getStopEventMsg(1, sessionId, status));
-                //                }
-                //                else
-                //                {
-                //                    curPos = VideoPlayerActivity.getCurrentPosition();
-                //                    duration = VideoPlayerActivity.getDuration();
-                //                    cacheDuration = curPos;
-                //                    if (curPos == -1 || duration == -1 || cacheDuration == -1)
-                //                    {
-                //                        status = Constant.Status.Status_load;
-                //                        playback_info = Constant.getPlaybackInfo(0, 0, 0, 0); //
-                //                    }
-                //                    else
-                //                    {
-                //                        status = Constant.Status.Status_play;
-                //                        playback_info = Constant.getPlaybackInfo(duration / 1000f,
-                //                                cacheDuration / 1000f, curPos / 1000f, 1);
-                //                    }
-                //
-                //                    httpContext.setAttribute(Constant.Need_sendReverse, status);
-                //                    httpContext.setAttribute(Constant.ReverseMsg,
-                //                            Constant.getVideoEventMsg(sessionId, status));
-                //                }
-                //
-                //                httpResponse.setStatusCode(HttpStatus.SC_OK);
             }
             else
             {
