@@ -566,47 +566,7 @@ public class RequestListenerThread extends Thread
             //IOS 8.4.1 从来不发 这个命令
             else if (target.equalsIgnoreCase(Constant.Target.PLAYBACK_INFO))
             {
-                String playback_info = "";
-                long duration = 0;
-                long cacheDuration = 0;
-                long curPos = 0;
-
-                String status = Constant.Status.Status_stop;
-
-                if (MyApplication.getInstance().isVideoActivityFinished())
-                {
-                    Log.d(tag, " airplay video activity is finished");
-                    status = Constant.Status.Status_stop;
-                }
-                else
-                {
-                    curPos = VideoPlayerActivity.getCurrentPosition();
-                    duration = VideoPlayerActivity.getDuration();
-                    cacheDuration = curPos
-                        + (long) (duration * VideoPlayerActivity.getBufferPercent() / 100);
-                    if (curPos == -1 || duration == -1 || cacheDuration == -1)
-                    {
-                        status = Constant.Status.Status_load;
-                        playback_info = Constant.getPlaybackInfo(0, 0, 0, 0); //
-                    }
-                    else
-                    {
-                        status = Constant.Status.Status_play;
-                        playback_info = Constant.getPlaybackInfo(duration / 1000f,
-                            cacheDuration / 1000f, curPos / 1000f, 1);
-                    }
-                }
-
-                /*
-                 * httpContext.setAttribute(Constant.Need_sendReverse, status);
-                 * httpContext.setAttribute(Constant.ReverseMsg,
-                 * Constant.getEventMsg(1, sessionId, status));
-                 */
-
-                httpResponse.setStatusCode(HttpStatus.SC_OK);
-                httpResponse.addHeader("Date", new Date().toString());
-                httpResponse.addHeader("Content-Type", "text/x-apple-plist+xml");
-                httpResponse.setEntity(new StringEntity(playback_info));
+                Log.d(tag,"airplay received playback_info request");
             }
             else
             {

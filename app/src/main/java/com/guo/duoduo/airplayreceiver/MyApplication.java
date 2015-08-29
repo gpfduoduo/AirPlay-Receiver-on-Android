@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -18,7 +19,7 @@ public class MyApplication extends Application
 
     private ConcurrentHashMap<String, Handler> mHandlerMap = new ConcurrentHashMap<String, Handler>();
 
-    private boolean isVideoFinished = false;
+    private AtomicBoolean isVideoFinished = new AtomicBoolean(false);
 
     @Override
     public void onCreate()
@@ -47,11 +48,11 @@ public class MyApplication extends Application
 
     public boolean isVideoActivityFinished()
     {
-        return isVideoFinished;
+        return isVideoFinished.get();
     }
 
     public void setVideoActivityFinish(boolean finished)
     {
-        this.isVideoFinished = finished;
+        isVideoFinished.set(finished);
     }
 }

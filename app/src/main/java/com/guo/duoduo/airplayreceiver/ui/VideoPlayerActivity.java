@@ -2,6 +2,8 @@ package com.guo.duoduo.airplayreceiver.ui;
 
 
 import java.lang.ref.WeakReference;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -25,7 +27,7 @@ import io.vov.vitamio.MediaPlayer.OnBufferingUpdateListener;
 
 
 /**
- * Created by Guo.Duoduo on 2015/8/25.
+ * Created by Guo.Duo duo on 2015/8/25.
  */
 public class VideoPlayerActivity extends Activity
     implements
@@ -39,7 +41,7 @@ public class VideoPlayerActivity extends Activity
     private static final String tag = "VideoPlayerActivity";
     private int mVideoWidth;
     private int mVideoHeight;
-    private static MediaPlayer mMediaPlayer;
+    private MediaPlayer mMediaPlayer;
     private SurfaceView mPreview;
     private SurfaceHolder holder;
     private String mPath;
@@ -49,6 +51,22 @@ public class VideoPlayerActivity extends Activity
 
     private Handler handler;
     private MyController controller;
+
+    private Timer timer;
+    private TimerTask timerTask;
+
+    public static volatile long duration = 0;
+    public static volatile long curPosition = 0;
+
+    public static long getDuration()
+    {
+        return duration;
+    }
+
+    public static long getCurrentPosition()
+    {
+        return curPosition;
+    }
 
     /**
      *
@@ -73,46 +91,25 @@ public class VideoPlayerActivity extends Activity
 
         MyApplication.getInstance().setVideoActivityFinish(false);
 
-    }
-
-    public static long getDuration()
-    {
-        if (mMediaPlayer != null)
+        timer = new Timer();
+        timerTask = new TimerTask()
         {
-            return mMediaPlayer.getDuration();
-        }
-        else
-            return -1;
-    }
-
-    public static long getCurrentPosition()
-    {
-        if (mMediaPlayer != null)
-        {
-            return mMediaPlayer.getCurrentPosition();
-        }
-        else
-            return -1;
-    }
-
-    public static boolean isPlaying()
-    {
-        if (mMediaPlayer != null)
-        {
-            return mMediaPlayer.isPlaying();
-        }
-        else
-            return false;
-    }
-
-    public static int getBufferPercent()
-    {
-        if (mMediaPlayer != null)
-        {
-            return mMediaPlayer.getBufferProgress();
-        }
-        else
-            return 0;
+            @Override
+            public void run()
+            {
+                if (mMediaPlayer != null)
+                {
+                    duration = mMediaPlayer.getDuration();
+                }
+                else
+                    duration = 0;
+                if (mMediaPlayer != null)
+                    curPosition = mMediaPlayer.getCurrentPosition();
+                else
+                    curPosition = 0;
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, 0, 1 * 1000);
     }
 
     private void playVideo()
@@ -219,6 +216,17 @@ public class VideoPlayerActivity extends Activity
         if (controller != null)
             controller.destroy();
         MyApplication.getInstance().setVideoActivityFinish(true);
+
+        if (timerTask != null)
+        {
+            timerTask.cancel();
+            timerTask = null;
+        }
+        if (timer != null)
+        {
+            timer.cancel();
+            timer = null;
+        }
     }
 
     private void releaseMediaPlayer()
