@@ -21,6 +21,8 @@ import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
 
+import javax.jmdns.NetworkTopologyDiscovery;
+
 import io.vov.vitamio.LibsChecker;
 import io.vov.vitamio.MediaPlayer;
 import io.vov.vitamio.MediaPlayer.OnBufferingUpdateListener;
@@ -55,8 +57,13 @@ public class VideoPlayerActivity extends Activity
     private Timer timer;
     private TimerTask timerTask;
 
-    public static volatile long duration = 0;
-    public static volatile long curPosition = 0;
+    private static volatile long duration = 0;
+    private static volatile long curPosition = 0;
+    private static volatile boolean isVideoActivityFinished = false;
+
+    public static boolean isVideoActivityFinished() {
+        return isVideoActivityFinished;
+    }
 
     public static long getDuration()
     {
@@ -76,6 +83,9 @@ public class VideoPlayerActivity extends Activity
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
+
+        isVideoActivityFinished = false;
+
         if (!LibsChecker.checkVitamioLibs(this))
             return;
 
@@ -89,21 +99,19 @@ public class VideoPlayerActivity extends Activity
         holder.addCallback(this);
         holder.setFormat(PixelFormat.RGBA_8888);
 
-        MyApplication.getInstance().setVideoActivityFinish(false);
-
         timer = new Timer();
         timerTask = new TimerTask()
         {
             @Override
             public void run()
             {
-                if (mMediaPlayer != null)
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying())
                 {
                     duration = mMediaPlayer.getDuration();
                 }
                 else
                     duration = 0;
-                if (mMediaPlayer != null)
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying())
                     curPosition = mMediaPlayer.getCurrentPosition();
                 else
                     curPosition = 0;
@@ -146,7 +154,6 @@ public class VideoPlayerActivity extends Activity
     public void onBufferingUpdate(MediaPlayer arg0, int percent)
     {
         Log.d(tag, "onBufferingUpdate percent:" + percent);
-
     }
 
     public void onCompletion(MediaPlayer arg0)
@@ -196,13 +203,13 @@ public class VideoPlayerActivity extends Activity
     {
         Log.d(tag, "surfaceCreated called");
         playVideo();
-
     }
 
     @Override
     protected void onPause()
     {
         super.onPause();
+        isVideoActivityFinished = true;
         releaseMediaPlayer();
         doCleanUp();
     }
@@ -211,11 +218,11 @@ public class VideoPlayerActivity extends Activity
     protected void onDestroy()
     {
         super.onDestroy();
+        Log.d(tag, "airplay VideoPlayerActivity onDestroy");
         releaseMediaPlayer();
         doCleanUp();
         if (controller != null)
             controller.destroy();
-        MyApplication.getInstance().setVideoActivityFinish(true);
 
         if (timerTask != null)
         {

@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -22,11 +23,11 @@ import com.guo.duoduo.airplayreceiver.http.RequestListenerThread;
 
 
 /**
- * Created by guo.duoduo on 2015/8/23.
+ * Created by Guo.Duo duo on 2015/8/23.
  */
 public class ImageActivity extends Activity
 {
-
+    private static final String tag = ImageActivity.class.getSimpleName();
     private ImageView iv;
     private MyController mController;
     private ImageHandler handler;
@@ -84,6 +85,7 @@ public class ImageActivity extends Activity
     public void onDestroy()
     {
         super.onDestroy();
+        Log.d(tag, "airplay ImageActivity onDestroy");
         RequestListenerThread.photoCacheMaps.clear();
         mController.destroy();
     }

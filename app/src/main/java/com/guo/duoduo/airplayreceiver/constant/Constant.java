@@ -90,9 +90,25 @@ public class Constant
             bodyStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
                 + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>category</key>\n"
-                + "<string>" + category + "</string>\n" + "<key>state</key>\n"
-                + "<string>" + state + "</string>\n" + "</dict>\n" + "</plist>\n";
+                + "<string>" + category + "</string>\n" + "<key>reason</key>\n"
+                + "<string>ended</string>\n" + "<key>state</key>\n" + "<string>" + state
+                + "</string>\n" + "</dict>\n" + "</plist>\n";
         }
+
+        String sendMsg = "POST /event HTTP/1.1\r\n" + "X-Apple-Session-ID:" + sessionId
+            + "\r\n" + "Content-Type: text/x-apple-plist+xml\r\n" + "Content-Length:"
+            + bodyStr.length() + "\r\n\r\n" + bodyStr;
+
+        return sendMsg;
+    }
+
+    public static String getVideoEventMsg(String sessionId, String state)
+    {
+        String category = "video";
+        String bodyStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            + "<plist version=\"1.0\">\n" + "<dict>\n" + "<key>category</key>\n"
+            + "<string>" + category + "</string>\n" + "<key>state</key>\n";
 
         String sendMsg = "POST /event HTTP/1.1\r\n" + "X-Apple-Session-ID:" + sessionId
             + "\r\n" + "Content-Type: text/x-apple-plist+xml\r\n" + "Content-Length:"

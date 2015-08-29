@@ -22,7 +22,10 @@ import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
 import com.guo.duoduo.airplayreceiver.http.RequestListenerThread;
+import com.guo.duoduo.airplayreceiver.ui.ImageActivity;
+import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
+import com.yixia.zi.widget.Toast;
 
 
 /**
@@ -32,19 +35,18 @@ public class ListenService extends Service
 {
     private static final String tag = ListenService.class.getSimpleName();
 
-    private static final String airplayName = "郭攀峰的Android实现";
+    private String airplayName = "GuoDuoTV";
     private MyController myController;
     private ServiceHandler handler;
 
-    private int tmpi = (int) (Math.random() * 100);
+    private static final String airplayType = "._airplay._tcp.local";
+    private static final String raopType = "._raop._tcp.local";
+
     private InetAddress localAddress;
     private JmDNS jmdnsAirplay = null;
     private JmDNS jmdnsRaop;
     private ServiceInfo airplayService = null;
     private ServiceInfo raopService;
-
-    private Timer registerTimer;
-    private TimerTask registerTask;
 
     private HashMap<String, String> values = new HashMap<String, String>();
     private String preMac;
@@ -56,8 +58,13 @@ public class ListenService extends Service
     {
         super.onCreate();
 
+        airplayName = android.os.Build.MODEL;
+
         handler = new ServiceHandler(ListenService.this);
         myController = new MyController(ListenService.class.getName(), handler);
+
+        Toast.showText(getApplicationContext(), "正在注册Airplay服务...",
+                android.widget.Toast.LENGTH_SHORT);
 
         new Thread()
         {
@@ -101,7 +108,6 @@ public class ListenService extends Service
     {
         Log.d(tag, "ListenService onDestroy");
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
         myController.destroy();
 
         new Thread()
@@ -121,9 +127,6 @@ public class ListenService extends Service
 
         if (thread != null)
             thread.destroy();
-
-        stopTimer();
-
     }
 
     @Override
@@ -142,34 +145,6 @@ public class ListenService extends Service
         Message msg = Message.obtain();
         msg.what = Constant.Register.OK;
         MyApplication.broadcastMessage(msg);
-
-        //定时器 每隔30s注册一下，实现手机断网后，再重新连接后，还可以发现。
-        startTimer();
-    }
-
-    private void startTimer()
-    {
-        registerTimer = new Timer();
-        registerTask = new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                Log.d(tag, "airplay timer");
-            }
-        };
-        registerTimer.scheduleAtFixedRate(registerTask, 15 * 1000, 15 * 1000);
-    }
-
-    private void stopTimer()
-    {
-        if (registerTimer != null && registerTask != null)
-        {
-            registerTask.cancel();
-            registerTimer.cancel();
-            registerTask = null;
-            registerTimer = null;
-        }
     }
 
     private void register() throws IOException
@@ -181,8 +156,8 @@ public class ListenService extends Service
 
     private void registerTcpLocal() throws IOException
     {
-        airplayService = ServiceInfo.create(airplayName + "._airplay._tcp.local",
-            airplayName, RequestListenerThread.port, 0, 0, values);
+        airplayService = ServiceInfo.create(airplayName + airplayType, airplayName,
+            RequestListenerThread.port, 0, 0, values);
         jmdnsAirplay = JmDNS.create(localAddress);//create的必须绑定ip地址 android 4.0以上
         jmdnsAirplay.registerService(airplayService);
     }
@@ -190,7 +165,7 @@ public class ListenService extends Service
     private void registerRaopLocal() throws IOException
     {
         String raopName = preMac + "@" + airplayName;
-        raopService = ServiceInfo.create(raopName + "._raop._tcp.local", raopName,
+        raopService = ServiceInfo.create(raopName + raopType, raopName,
             RequestListenerThread.port - 1,
             "tp=UDP sm=false sv=false ek=1 et=0,1 cn=0,1 ch=2 ss=16 "
                 + "sr=44100 pw=false vn=3 da=true md=0,1,2 vs=103.14 txtvers=1");
@@ -207,7 +182,7 @@ public class ListenService extends Service
         try
         {
             str_Array = NetworkUtils.getMACAddress(localAddress);
-            strMac = str_Array[0];
+            strMac = str_Array[0].toUpperCase();
             preMac = str_Array[1];
         }
         catch (Exception e)
@@ -224,7 +199,7 @@ public class ListenService extends Service
 
     private void unregisterAirplay()
     {
-        Log.d(tag, "un regitser airplay service");
+        Log.d(tag, "un register airplay service");
 
         if (jmdnsAirplay != null && jmdnsRaop != null)
         {
@@ -260,6 +235,37 @@ public class ListenService extends Service
                 return;
             switch (msg.what)
             {
+                case Constant.Register.OK :
+                    Toast.showText(service.getApplicationContext(), "Airplay注册成功",
+                        android.widget.Toast.LENGTH_SHORT);
+                    break;
+                case Constant.Register.FAIL :
+                    Toast.showText(service.getApplicationContext(), "Airplay注册失败",
+                        android.widget.Toast.LENGTH_SHORT);
+                    break;
+                case Constant.Msg.Msg_Photo :
+                {
+                    byte[] pic = (byte[]) msg.obj;
+                    Intent intent = new Intent(service, ImageActivity.class);
+                    intent.putExtra("picture", pic);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    service.startActivity(intent);
+                    break;
+                }
+
+                case Constant.Msg.Msg_Video_Play :
+                {
+                    HashMap<String, String> map = (HashMap) msg.obj;
+                    String playUrl = map.get(Constant.PlayURL);
+                    String startPos = map.get(Constant.Start_Pos);
+
+                    Intent intent = new Intent(service, VideoPlayerActivity.class);
+                    intent.putExtra("path", playUrl);
+                    intent.putExtra("position", Double.valueOf(startPos));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    service.startActivity(intent);
+                    break;
+                }
 
             }
         }
