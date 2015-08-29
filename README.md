@@ -135,7 +135,7 @@ airplay  incoming HTTP  method = PUT; target = /photo;
   记住duration:之后有一个空格，否则iphone 进入 airplay模式，时间就不东了，不会和android播放, 具体的参考代码。  
   
 #### 具体的协议分析   
-以iphone6上的优酷客户端为例，向我的android设备推送视频
+以iphone6上的优酷客户端为例，向我的android设备推送视频  
 1、iphone发送 http post /play http 1.1 消息 ，里面包含了推送的视频的url地址（http链接，优酷为，m3u8文件），字段为Content-Location，和起始的播放时间点，字段为Start-Position。   
 android设备回复http 200 ok    
 
@@ -144,21 +144,28 @@ android设备需要回复你的播放duration: 和 position两个字段
 
 3、iphone发送 http post /reverse 消息   
 android设备需要回复 switch protocols 并且保存该长链接，该链接后续用于向iphone设备发送你的android设备播放停止的消息。  
+
 4、媒体在android客户端播放后   
 iphone不停的发送 http get /scrub消息，用于获取当前android设备的播放duration和position   
 android设备回复你当前的播放duration和position。  
+
 5、当你的iphone点击暂停后   
 iphone发送http post /rate消息，其中包含字段value，如果value字段为0说明为暂停播放了   
 android设备收到该指令就要暂停播放了   
+
 6、当你的 iphone重新播放后   
 iphone发送http post /rate消息，字段value 为 1   
 android设备重新开始播放   
+
 7、当你的iphone退出airplay后    
 iphone向android设备推送 http post /stop消息   
-android收到后，退出播放，同时使用reverse长链接向iphone发送post消息，报告自己的状态为stopped。   
+android收到后，退出播放，同时使用reverse长链接向iphone发送post消息，报告自己的状态为stopped。  
+
 8、当你的android设备主动退出播放   
 android设备需要主动通过reverse长链接向iphone发送post消息，报告自己stoppe的   
 iphone收到后退出airplay模式  
+
+具体的协议交互截图就不发上传了，可以自行抓包分析  
 
 #### 推送效果
 gif图有点大需要等待。     
