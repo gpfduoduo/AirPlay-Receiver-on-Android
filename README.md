@@ -90,7 +90,6 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 
 
 推送第一张图片  
-
 08-25 13:32:48.508  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = 78A1BB2D-5488-4372-95EA-FF32737B563C 缓存 左边  
 
 08-25 13:32:48.523  14608-15497/com.guo.duoduo.airplayreceiver D/MyLineParse
@@ -99,32 +98,22 @@ airplay  incoming HTTP  method = PUT; target = /photo;
 08-25 13:32:48.725  14608-15497/com.guo.duoduo.airplayreceiver D/MyLineParser﹕
 08-25 13:32:48.752  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display image; assetKey = X-Apple-AssetKey: 8B792485-B6B6-4CF4-91D9-A14734E9E790 显示 当前    
 
-
-
 右滑动   
-
 08-25 13:35:46.201  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display cached image, assetKey = 78A1BB2D-5488-4372-95EA-FF32737B563C 原来左边变为当前显示  
 
 08-25 13:35:46.345  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = B6711879-7539-4980-8213-98FA76FDD11A  缓存左边  
 
-
 右滑动   
-
 08-25 13:38:01.586  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display cached image, assetKey = B6711879-7539-4980-8213-98FA76FDD11A 上一个的左边变为当前  
-
 
 08-25 13:38:01.642  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = 15FE410D-84D3-4ED8-A741-673CD2DFD0F4 缓存左边  
 
-
 左滑动  
-
 08-25 13:42:04.883  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display cached image, assetKey = 78A1BB2D-5488-4372-95EA-FF32737B563C  
 
 08-25 13:42:04.980  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = 8B792485-B6B6-4CF4-91D9-A14734E9E790   
 
-
 左滑动  
-
 08-25 13:47:06.468  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay display cached image, assetKey = 8B792485-B6B6-4CF4-91D9-A14734E9E790  
 
 08-25 13:47:06.542  14608-15497/com.guo.duoduo.airplayreceiver D/WebServiceHandler﹕ airplay cached image, assetKey = F6BC486E-821B-4D74-B257-80AF280C6E5C  
@@ -145,8 +134,31 @@ airplay  incoming HTTP  method = PUT; target = /photo;
   ```
   记住duration:之后有一个空格，否则iphone 进入 airplay模式，时间就不东了，不会和android播放, 具体的参考代码。  
   
-#### 具体的协议分析
-待添加。
+#### 具体的协议分析   
+以iphone6上的优酷客户端为例，向我的android设备推送视频
+1、iphone发送 http post /play http 1.1 消息 ，里面包含了推送的视频的url地址（http链接，优酷为，m3u8文件），字段为Content-Location，和起始的播放时间点，字段为Start-Position。   
+android设备回复http 200 ok    
+
+2、iphone紧接着发送http get /scrub http 1.1 消息，get方法是用来获取当前你的android设备的播放器获取的该链接的总体播放时间和当前播放时间。   
+android设备需要回复你的播放duration: 和 position两个字段   
+
+3、iphone发送 http post /reverse 消息   
+android设备需要回复 switch protocols 并且保存该长链接，该链接后续用于向iphone设备发送你的android设备播放停止的消息。  
+4、媒体在android客户端播放后   
+iphone不停的发送 http get /scrub消息，用于获取当前android设备的播放duration和position   
+android设备回复你当前的播放duration和position。  
+5、当你的iphone点击暂停后   
+iphone发送http post /rate消息，其中包含字段value，如果value字段为0说明为暂停播放了   
+android设备收到该指令就要暂停播放了   
+6、当你的 iphone重新播放后   
+iphone发送http post /rate消息，字段value 为 1   
+android设备重新开始播放   
+7、当你的iphone退出airplay后    
+iphone向android设备推送 http post /stop消息   
+android收到后，退出播放，同时使用reverse长链接向iphone发送post消息，报告自己的状态为stopped。   
+8、当你的android设备主动退出播放   
+android设备需要主动通过reverse长链接向iphone发送post消息，报告自己stoppe的   
+iphone收到后退出airplay模式  
 
 #### 推送效果
 gif图有点大需要等待。     
