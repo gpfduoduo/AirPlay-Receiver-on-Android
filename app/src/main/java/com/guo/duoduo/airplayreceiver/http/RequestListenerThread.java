@@ -535,7 +535,7 @@ public class RequestListenerThread extends Thread
                 httpResponse.setHeader("Date", new Date().toString());
                 httpResponse.setEntity(returnBody);
             }
-            else if (target.startsWith(Constant.Target.RATE)) //设置播放的速率
+            else if (target.startsWith(Constant.Target.RATE)) //设置播放的速率(其实就是播放和暂停)
             {
                 int playState = Constant.Msg.Msg_Video_Resume;
                 String status = Constant.Status.Status_play;
@@ -566,7 +566,7 @@ public class RequestListenerThread extends Thread
             //IOS 8.4.1 从来不发 这个命令
             else if (target.equalsIgnoreCase(Constant.Target.PLAYBACK_INFO))
             {
-                Log.d(tag,"airplay received playback_info request");
+              Log.d(tag,"airplay received playback_info request");
             }
             else
             {
