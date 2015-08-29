@@ -6,7 +6,10 @@
 2、iphone中的优酷播放器通过airplay推送视频到android，支持暂停、播放、seek和在随意时间点推送播放  
 3、当android客户端推出播放后，ipone就退出airplay模式。  
 4、airplay发现android设备，你可以随便修改自己的名称，例如显示：我的电视 等  
-5、视频播放时，android和ipone是同步的，时间一致。  
+5、视频播放时，android和ipone是同步的，时间一致。 
+
+未实现：  
+android客户端先启动，iphone后启动，iphone怎样发现android，由于服务注册发现使用的第三方jmdns。因此还需要进一步研究M_DNS和DNS_SD。
 
 # 项目介绍
 目前是移动互联网的时代，小屏幕已经占领了我们生活的大部分时间，然而在家庭内的另一个屏幕就是电视屏幕，如果让两个屏幕连接起来，
