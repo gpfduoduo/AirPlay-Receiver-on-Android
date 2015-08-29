@@ -9,7 +9,8 @@
 5、视频播放时，android和ipone是同步的，时间一致。 
 
 未实现：  
-android客户端先启动，iphone后启动，iphone怎样发现android，由于服务注册发现使用的第三方jmdns。因此还需要进一步研究M_DNS和DNS_SD。
+1、腾讯视频推送airplay与优酷不一样，里面牵扯到了RTSP，不是单纯的HTTP。下一步继续研究。  
+2、android客户端先启动，iphone后启动，iphone怎样发现android，由于服务注册发现使用的第三方jmdns。因此还需要进一步研究M_DNS和DNS_SD。
 
 # 项目介绍
 目前是移动互联网的时代，小屏幕已经占领了我们生活的大部分时间，然而在家庭内的另一个屏幕就是电视屏幕，如果让两个屏幕连接起来，
