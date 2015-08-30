@@ -43,7 +43,7 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
 
         <service
-            android:name=".service.ListenService"
+            android:name=".service.RegisterService"
             android:exported="true">
             <intent-filter android:priority="1000">
                 <action android:name="com.guo.duoduo.airplayreceiver" />

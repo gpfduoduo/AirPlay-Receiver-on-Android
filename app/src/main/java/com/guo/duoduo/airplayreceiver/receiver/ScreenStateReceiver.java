@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
-import com.guo.duoduo.airplayreceiver.service.ListenService;
+import com.guo.duoduo.airplayreceiver.service.RegisterService;
 
 
 public class ScreenStateReceiver extends BroadcastReceiver
@@ -25,13 +25,13 @@ public class ScreenStateReceiver extends BroadcastReceiver
         {
             Log.d(tag, "action screen off");
             MyApplication.getInstance().stopService(
-                new Intent(MyApplication.getInstance(), ListenService.class));
+                new Intent(MyApplication.getInstance(), RegisterService.class));
         }
         else if (Intent.ACTION_USER_PRESENT.equals(action))
         {
             Log.d(tag, "action screen on");
             MyApplication.getInstance().startService(
-                new Intent(MyApplication.getInstance(), ListenService.class));
+                new Intent(MyApplication.getInstance(), RegisterService.class));
         }
 
     }

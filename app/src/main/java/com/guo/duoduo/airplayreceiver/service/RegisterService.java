@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -31,9 +29,9 @@ import com.yixia.zi.widget.Toast;
 /**
  * Created by Guo.DUO duo on 2015/8/27.
  */
-public class ListenService extends Service
+public class RegisterService extends Service
 {
-    private static final String tag = ListenService.class.getSimpleName();
+    private static final String tag = RegisterService.class.getSimpleName();
 
     private String airplayName = "GuoDuoTV";
     private MyController myController;
@@ -60,8 +58,8 @@ public class ListenService extends Service
 
         airplayName = android.os.Build.MODEL;
 
-        handler = new ServiceHandler(ListenService.this);
-        myController = new MyController(ListenService.class.getName(), handler);
+        handler = new ServiceHandler(RegisterService.this);
+        myController = new MyController(RegisterService.class.getName(), handler);
 
         Toast.showText(getApplicationContext(), "正在注册Airplay服务...",
                 android.widget.Toast.LENGTH_SHORT);
@@ -106,7 +104,7 @@ public class ListenService extends Service
     @Override
     public void onDestroy()
     {
-        Log.d(tag, "ListenService onDestroy");
+        Log.d(tag, "RegisterService onDestroy");
         super.onDestroy();
         myController.destroy();
 
@@ -219,18 +217,18 @@ public class ListenService extends Service
 
     private static class ServiceHandler extends Handler
     {
-        private WeakReference<ListenService> weakReference;
+        private WeakReference<RegisterService> weakReference;
 
-        public ServiceHandler(ListenService service)
+        public ServiceHandler(RegisterService service)
         {
-            weakReference = new WeakReference<ListenService>(service);
+            weakReference = new WeakReference<RegisterService>(service);
         }
 
         @Override
         public void handleMessage(Message msg)
         {
             super.handleMessage(msg);
-            ListenService service = weakReference.get();
+            RegisterService service = weakReference.get();
             if (service == null)
                 return;
             switch (msg.what)

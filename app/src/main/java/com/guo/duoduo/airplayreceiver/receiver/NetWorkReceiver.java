@@ -10,7 +10,7 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
-import com.guo.duoduo.airplayreceiver.service.ListenService;
+import com.guo.duoduo.airplayreceiver.service.RegisterService;
 
 
 public class NetWorkReceiver extends BroadcastReceiver
@@ -38,13 +38,13 @@ public class NetWorkReceiver extends BroadcastReceiver
                 {
                     Log.d(tag, "network is connected");
                     MyApplication.getInstance().startService(
-                        new Intent(MyApplication.getInstance(), ListenService.class));
+                        new Intent(MyApplication.getInstance(), RegisterService.class));
                 }
                 else
                 {
                     Log.d(tag, "network is not connected");
                     MyApplication.getInstance().stopService(
-                        new Intent(MyApplication.getInstance(), ListenService.class));
+                        new Intent(MyApplication.getInstance(), RegisterService.class));
                 }
             }
         }
