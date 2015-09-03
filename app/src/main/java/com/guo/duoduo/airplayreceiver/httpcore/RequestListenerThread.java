@@ -1,4 +1,4 @@
-package com.guo.duoduo.airplayreceiver.http;
+package com.guo.duoduo.airplayreceiver.httpcore;
 
 
 import java.io.IOException;
@@ -47,6 +47,7 @@ import android.util.Log;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
+import com.guo.duoduo.airplayreceiver.service.RegisterService;
 import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.BplistParser;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
@@ -59,10 +60,9 @@ public class RequestListenerThread extends Thread
 {
     private static final String tag = RequestListenerThread.class.getSimpleName();
 
-    public static final int port = 5000;
     public static Map<String, byte[]> photoCacheMaps = Collections
             .synchronizedMap(new HashMap<String, byte[]>());
-    protected static Map<String, Socket> socketMaps = Collections
+    private static Map<String, Socket> socketMaps = Collections
             .synchronizedMap(new HashMap<String, Socket>());
     private static String localMac = null;
     private ServerSocket serversocket;
@@ -115,13 +115,14 @@ public class RequestListenerThread extends Thread
             str_Array = NetworkUtils.getMACAddress(localAddress);
             String strMac = str_Array[0];
             localMac = strMac.toUpperCase(Locale.ENGLISH);
+            Log.d(tag, "airplay local mac = " + localMac);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        serversocket = new ServerSocket(port, 20, localAddress);
+        serversocket = new ServerSocket(RegisterService.port, 2, localAddress);
 
         params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
@@ -188,6 +189,8 @@ public class RequestListenerThread extends Thread
                 while (!Thread.interrupted() && this.conn.isOpen())
                 {
                     this.httpService.handleRequest(this.conn, context);
+
+                    Log.d(tag, "socket maps size = " + socketMaps.size());
 
                     String needSendReverse = (String) context
                             .getAttribute(Constant.Need_sendReverse);
@@ -368,8 +371,7 @@ public class RequestListenerThread extends Thread
             }
             else if (target.equals(Constant.Target.SERVER_INFO))
             {
-                String responseStr = Constant.getServerInfoResponse(localMac
-                        .toUpperCase(Locale.ENGLISH));
+                String responseStr = Constant.getServerInfoResponse(localMac);
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.addHeader("Date", new Date().toString());
                 httpResponse.setEntity(new StringEntity(responseStr));
@@ -453,7 +455,7 @@ public class RequestListenerThread extends Thread
                 Log.d(tag, " airplay play action request content = " + requestBody);
                 //如果是来自 iphone 推送的视频
                 if (contentType.equalsIgnoreCase("application/x-apple-binary-plist"))
-                {
+                {  //<BINARY PLIST DATA>
                     HashMap map = BplistParser.parse(entityContent);
                     playUrl = (String) map.get("Content-Location");
                     startPos = (Double) map.get("Start-Position");
@@ -502,18 +504,20 @@ public class RequestListenerThread extends Thread
                     MyApplication.getInstance().broadcastMessage(msg);
                 }
                 else
-                { //get方法 获取播放的duration and position
+                //get方法 获取播放的duration and position
+                {
                     long duration = 0;
                     long curPos = 0;
-                    duration = VideoPlayerActivity.getDuration();
-                    curPos = VideoPlayerActivity.getCurrentPosition();
-                    duration = duration < 0 ? 0 : duration;
-                    curPos = curPos < 0 ? 0 : curPos;
-                    Log.d(tag, "airplay get method scrub: duration=" + duration
-                        + "; position=" + curPos);
 
                     if (!VideoPlayerActivity.isVideoActivityFinished())
                     {
+                        duration = VideoPlayerActivity.getDuration();
+                        curPos = VideoPlayerActivity.getCurrentPosition();
+                        duration = duration < 0 ? 0 : duration;
+                        curPos = curPos < 0 ? 0 : curPos;
+                        Log.d(tag, "airplay get method scrub: duration=" + duration
+                                + "; position=" + curPos);
+
                         //毫秒需要转为秒
                         DecimalFormat decimalFormat = new DecimalFormat(".000000");//
                         String strDuration = decimalFormat.format(duration / 1000f);
@@ -562,10 +566,59 @@ public class RequestListenerThread extends Thread
                 httpResponse.setStatusCode(HttpStatus.SC_OK);
                 httpResponse.setHeader("Date", new Date().toString());
             }
-            //IOS 8.4.1 从来不发 这个命令
+            //IOS 8.4.1 从来不发 这个命令（优酷不发送，腾讯 video是发送的）
             else if (target.equalsIgnoreCase(Constant.Target.PLAYBACK_INFO))
             {
                 Log.d(tag, "airplay received playback_info request");
+                String playback_info = "";
+                long duration = 0;
+                long cacheDuration = 0;
+                long curPos = 0;
+
+                String status = Constant.Status.Status_stop;
+
+                if (VideoPlayerActivity.isVideoActivityFinished())
+                {
+                    Log.d(tag, " airplay video activity is finished");
+                    status = Constant.Status.Status_stop;
+
+                    httpContext.setAttribute(Constant.Need_sendReverse, status);
+                    httpContext.setAttribute(Constant.ReverseMsg,
+                        Constant.getStopEventMsg(1, sessionId, status));
+                }
+                else
+                {
+                    curPos = VideoPlayerActivity.getCurrentPosition();
+                    duration = VideoPlayerActivity.getDuration();
+                    cacheDuration = curPos;
+                    if (curPos == -1 || duration == -1 || cacheDuration == -1)
+                    {
+                        status = Constant.Status.Status_load;
+                        playback_info = Constant.getPlaybackInfo(0, 0, 0, 0); //
+                    }
+                    else
+                    {
+                        status = Constant.Status.Status_play;
+                        playback_info = Constant.getPlaybackInfo(duration / 1000f,
+                            cacheDuration / 1000f, curPos / 1000f, 1);
+                    }
+
+                    httpContext.setAttribute(Constant.Need_sendReverse, status);
+                    httpContext.setAttribute(Constant.ReverseMsg,
+                        Constant.getVideoEventMsg(sessionId, status));
+                }
+
+                httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.addHeader("Date", new Date().toString());
+                httpResponse.addHeader("Content-Type", "text/x-apple-plist+xml");
+                httpResponse.setEntity(new StringEntity(playback_info));
+            }
+            else if (target.equals("/fp-setup"))
+            {
+                Log.d(tag, "airplay setup content  ="
+                    + new String(entityContent, "UTF-8"));
+                httpResponse.setStatusCode(HttpStatus.SC_OK);
+                httpResponse.addHeader("Date", new Date().toString());
             }
             else
             {

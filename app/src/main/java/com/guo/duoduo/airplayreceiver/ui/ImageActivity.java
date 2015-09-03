@@ -19,7 +19,8 @@ import android.widget.ImageView;
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
-import com.guo.duoduo.airplayreceiver.http.RequestListenerThread;
+import com.guo.duoduo.airplayreceiver.httpProcess.HttpProcess;
+import com.guo.duoduo.airplayreceiver.httpcore.RequestListenerThread;
 
 
 /**
@@ -38,7 +39,7 @@ public class ImageActivity extends Activity
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_image);
 
         handler = new ImageHandler(ImageActivity.this);
@@ -87,8 +88,10 @@ public class ImageActivity extends Activity
         super.onDestroy();
         Log.d(tag, "airplay ImageActivity onDestroy");
         RequestListenerThread.photoCacheMaps.clear();
+        HttpProcess.photoCache.clear();
         mController.destroy();
     }
+
     private static class ImageHandler extends Handler
     {
 

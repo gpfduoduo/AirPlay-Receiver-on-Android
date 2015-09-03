@@ -3,13 +3,16 @@
  */
 package javax.jmdns;
 
+
 import java.net.InetAddress;
 import java.util.EventObject;
+
 
 /**
  * @author C&eacute;drik Lime, Pierre Frisch
  */
-public abstract class NetworkTopologyEvent extends EventObject {
+public abstract class NetworkTopologyEvent extends EventObject
+{
 
     /**
      *
@@ -19,17 +22,17 @@ public abstract class NetworkTopologyEvent extends EventObject {
     /**
      * Constructs a Service Event.
      * 
-     * @param eventSource
-     *            The DNS on which the Event initially occurred.
-     * @exception IllegalArgumentException
-     *                if source is null.
+     * @param eventSource The DNS on which the Event initially occurred.
+     * @exception IllegalArgumentException if source is null.
      */
-    protected NetworkTopologyEvent(final Object eventSource) {
+    protected NetworkTopologyEvent(final Object eventSource)
+    {
         super(eventSource);
     }
 
     /**
-     * Returns the JmDNS instance associated with the event or null if it is a generic event.
+     * Returns the JmDNS instance associated with the event or null if it is a
+     * generic event.
      * 
      * @return JmDNS instance
      */

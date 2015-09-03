@@ -1,4 +1,4 @@
-package com.guo.duoduo.airplayreceiver.http;
+package com.guo.duoduo.airplayreceiver.httpcore;
 
 
 import org.apache.http.HttpRequest;

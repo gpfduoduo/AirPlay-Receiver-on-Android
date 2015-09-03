@@ -1,7 +1,6 @@
 package com.guo.duoduo.airplayreceiver.utils;
 
 
-import java.io.File;
 import java.util.HashMap;
 
 import android.util.Log;
@@ -84,6 +83,7 @@ public class BplistParser
         catch (Exception e)
         {
             e.printStackTrace();
+            return null;
         }
 
         return map;

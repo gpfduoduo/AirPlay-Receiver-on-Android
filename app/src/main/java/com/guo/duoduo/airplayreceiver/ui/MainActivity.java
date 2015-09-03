@@ -9,10 +9,12 @@ import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.service.RegisterService;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity
+{
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -20,7 +22,8 @@ public class MainActivity extends Activity {
         onBackPressed();
     }
 
-    private void startListenService() {
+    private void startListenService()
+    {
         Intent intent = new Intent(getApplicationContext(), RegisterService.class);
         startService(intent);
         finish();

@@ -1,6 +1,7 @@
 // Licensed under Apache License version 2.0
 package javax.jmdns.impl.tasks;
 
+
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,12 +13,14 @@ import javax.jmdns.impl.DNSRecord;
 import javax.jmdns.impl.JmDNSImpl;
 import javax.jmdns.impl.constants.DNSConstants;
 
+
 /**
  * This is the root class for all task scheduled by the timer in JmDNS.
  * 
  * @author Pierre Frisch
  */
-public abstract class DNSTask extends TimerTask {
+public abstract class DNSTask extends TimerTask
+{
 
     /**
      *
@@ -27,7 +30,8 @@ public abstract class DNSTask extends TimerTask {
     /**
      * @param jmDNSImpl
      */
-    protected DNSTask(JmDNSImpl jmDNSImpl) {
+    protected DNSTask(JmDNSImpl jmDNSImpl)
+    {
         super();
         this._jmDNSImpl = jmDNSImpl;
     }
@@ -37,15 +41,15 @@ public abstract class DNSTask extends TimerTask {
      * 
      * @return associated DNS
      */
-    public JmDNSImpl getDns() {
+    public JmDNSImpl getDns()
+    {
         return _jmDNSImpl;
     }
 
     /**
      * Start this task.
      * 
-     * @param timer
-     *            task timer.
+     * @param timer task timer.
      */
     public abstract void start(Timer timer);
 
@@ -58,28 +62,32 @@ public abstract class DNSTask extends TimerTask {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         return this.getName();
     }
 
     /**
      * Add a question to the message.
      * 
-     * @param out
-     *            outgoing message
-     * @param rec
-     *            DNS question
+     * @param out outgoing message
+     * @param rec DNS question
      * @return outgoing message for the next question
      * @exception IOException
      */
-    public DNSOutgoing addQuestion(DNSOutgoing out, DNSQuestion rec) throws IOException {
+    public DNSOutgoing addQuestion(DNSOutgoing out, DNSQuestion rec) throws IOException
+    {
         DNSOutgoing newOut = out;
-        try {
+        try
+        {
             newOut.addQuestion(rec);
-        } catch (final IOException e) {
+        }
+        catch (final IOException e)
+        {
             int flags = newOut.getFlags();
             boolean multicast = newOut.isMulticast();
             int maxUDPPayload = newOut.getMaxUDPPayload();
@@ -98,20 +106,22 @@ public abstract class DNSTask extends TimerTask {
     /**
      * Add an answer if it is not suppressed.
      * 
-     * @param out
-     *            outgoing message
-     * @param in
-     *            incoming request
-     * @param rec
-     *            DNS record answer
+     * @param out outgoing message
+     * @param in incoming request
+     * @param rec DNS record answer
      * @return outgoing message for the next answer
      * @exception IOException
      */
-    public DNSOutgoing addAnswer(DNSOutgoing out, DNSIncoming in, DNSRecord rec) throws IOException {
+    public DNSOutgoing addAnswer(DNSOutgoing out, DNSIncoming in, DNSRecord rec)
+            throws IOException
+    {
         DNSOutgoing newOut = out;
-        try {
+        try
+        {
             newOut.addAnswer(in, rec);
-        } catch (final IOException e) {
+        }
+        catch (final IOException e)
+        {
             int flags = newOut.getFlags();
             boolean multicast = newOut.isMulticast();
             int maxUDPPayload = newOut.getMaxUDPPayload();
@@ -130,19 +140,22 @@ public abstract class DNSTask extends TimerTask {
     /**
      * Add an answer to the message.
      * 
-     * @param out
-     *            outgoing message
-     * @param rec
-     *            DNS record answer
+     * @param out outgoing message
+     * @param rec DNS record answer
      * @param now
      * @return outgoing message for the next answer
      * @exception IOException
      */
-    public DNSOutgoing addAnswer(DNSOutgoing out, DNSRecord rec, long now) throws IOException {
+    public DNSOutgoing addAnswer(DNSOutgoing out, DNSRecord rec, long now)
+            throws IOException
+    {
         DNSOutgoing newOut = out;
-        try {
+        try
+        {
             newOut.addAnswer(rec, now);
-        } catch (final IOException e) {
+        }
+        catch (final IOException e)
+        {
             int flags = newOut.getFlags();
             boolean multicast = newOut.isMulticast();
             int maxUDPPayload = newOut.getMaxUDPPayload();
@@ -161,18 +174,21 @@ public abstract class DNSTask extends TimerTask {
     /**
      * Add an authoritative answer to the message.
      * 
-     * @param out
-     *            outgoing message
-     * @param rec
-     *            DNS record answer
+     * @param out outgoing message
+     * @param rec DNS record answer
      * @return outgoing message for the next answer
      * @exception IOException
      */
-    public DNSOutgoing addAuthoritativeAnswer(DNSOutgoing out, DNSRecord rec) throws IOException {
+    public DNSOutgoing addAuthoritativeAnswer(DNSOutgoing out, DNSRecord rec)
+            throws IOException
+    {
         DNSOutgoing newOut = out;
-        try {
+        try
+        {
             newOut.addAuthorativeAnswer(rec);
-        } catch (final IOException e) {
+        }
+        catch (final IOException e)
+        {
             int flags = newOut.getFlags();
             boolean multicast = newOut.isMulticast();
             int maxUDPPayload = newOut.getMaxUDPPayload();
@@ -191,20 +207,22 @@ public abstract class DNSTask extends TimerTask {
     /**
      * Add an additional answer to the record. Omit if there is no room.
      * 
-     * @param out
-     *            outgoing message
-     * @param in
-     *            incoming request
-     * @param rec
-     *            DNS record answer
+     * @param out outgoing message
+     * @param in incoming request
+     * @param rec DNS record answer
      * @return outgoing message for the next answer
      * @exception IOException
      */
-    public DNSOutgoing addAdditionalAnswer(DNSOutgoing out, DNSIncoming in, DNSRecord rec) throws IOException {
+    public DNSOutgoing addAdditionalAnswer(DNSOutgoing out, DNSIncoming in, DNSRecord rec)
+            throws IOException
+    {
         DNSOutgoing newOut = out;
-        try {
+        try
+        {
             newOut.addAdditionalAnswer(in, rec);
-        } catch (final IOException e) {
+        }
+        catch (final IOException e)
+        {
             int flags = newOut.getFlags();
             boolean multicast = newOut.isMulticast();
             int maxUDPPayload = newOut.getMaxUDPPayload();

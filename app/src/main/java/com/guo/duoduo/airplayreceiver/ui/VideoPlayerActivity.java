@@ -16,12 +16,9 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
-
-import javax.jmdns.NetworkTopologyDiscovery;
 
 import io.vov.vitamio.LibsChecker;
 import io.vov.vitamio.MediaPlayer;
@@ -41,6 +38,9 @@ public class VideoPlayerActivity extends Activity
 {
 
     private static final String tag = "VideoPlayerActivity";
+    private static volatile long duration = 0;
+    private static volatile long curPosition = 0;
+    private static volatile boolean isVideoActivityFinished = false;
     private int mVideoWidth;
     private int mVideoHeight;
     private MediaPlayer mMediaPlayer;
@@ -50,18 +50,13 @@ public class VideoPlayerActivity extends Activity
     private double position;
     private boolean mIsVideoSizeKnown = false;
     private boolean mIsVideoReadyToBePlayed = false;
-
     private Handler handler;
     private MyController controller;
-
     private Timer timer;
     private TimerTask timerTask;
 
-    private static volatile long duration = 0;
-    private static volatile long curPosition = 0;
-    private static volatile boolean isVideoActivityFinished = false;
-
-    public static boolean isVideoActivityFinished() {
+    public static boolean isVideoActivityFinished()
+    {
         return isVideoActivityFinished;
     }
 

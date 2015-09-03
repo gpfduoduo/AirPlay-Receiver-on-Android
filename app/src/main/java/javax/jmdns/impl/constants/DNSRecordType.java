@@ -3,14 +3,18 @@
  */
 package javax.jmdns.impl.constants;
 
+
 import java.util.logging.Logger;
+
 
 /**
  * DNS Record Type
  * 
- * @author Arthur van Hoff, Jeff Sonstein, Werner Randelshofer, Pierre Frisch, Rick Blair
+ * @author Arthur van Hoff, Jeff Sonstein, Werner Randelshofer, Pierre Frisch,
+ *         Rick Blair
  */
-public enum DNSRecordType {
+public enum DNSRecordType
+{
     /**
      * Address
      */
@@ -250,42 +254,29 @@ public enum DNSRecordType {
 
     private static Logger logger = Logger.getLogger(DNSRecordType.class.getName());
 
-    private final String  _externalName;
+    private final String _externalName;
 
-    private final int     _index;
+    private final int _index;
 
-    DNSRecordType(String name, int index) {
+    DNSRecordType(String name, int index)
+    {
         _externalName = name;
         _index = index;
-    }
-
-    /**
-     * Return the string representation of this type
-     * 
-     * @return String
-     */
-    public String externalName() {
-        return _externalName;
-    }
-
-    /**
-     * Return the numeric value of this type
-     * 
-     * @return String
-     */
-    public int indexValue() {
-        return _index;
     }
 
     /**
      * @param name
      * @return type for name
      */
-    public static DNSRecordType typeForName(String name) {
-        if (name != null) {
+    public static DNSRecordType typeForName(String name)
+    {
+        if (name != null)
+        {
             String aName = name.toLowerCase();
-            for (DNSRecordType aType : DNSRecordType.values()) {
-                if (aType._externalName.equals(aName)) return aType;
+            for (DNSRecordType aType : DNSRecordType.values())
+            {
+                if (aType._externalName.equals(aName))
+                    return aType;
             }
         }
         logger.severe("Could not find record type for name: " + name);
@@ -296,16 +287,40 @@ public enum DNSRecordType {
      * @param index
      * @return type for name
      */
-    public static DNSRecordType typeForIndex(int index) {
-        for (DNSRecordType aType : DNSRecordType.values()) {
-            if (aType._index == index) return aType;
+    public static DNSRecordType typeForIndex(int index)
+    {
+        for (DNSRecordType aType : DNSRecordType.values())
+        {
+            if (aType._index == index)
+                return aType;
         }
         logger.severe("Could not find record type for index: " + index);
         return TYPE_IGNORE;
     }
 
+    /**
+     * Return the string representation of this type
+     *
+     * @return String
+     */
+    public String externalName()
+    {
+        return _externalName;
+    }
+
+    /**
+     * Return the numeric value of this type
+     *
+     * @return String
+     */
+    public int indexValue()
+    {
+        return _index;
+    }
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         return this.name() + " index " + this.indexValue();
     }
 

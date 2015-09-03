@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
 import android.app.Service;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -19,7 +21,7 @@ import android.util.Log;
 import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
-import com.guo.duoduo.airplayreceiver.http.RequestListenerThread;
+import com.guo.duoduo.airplayreceiver.httpProcess.HttpProcess;
 import com.guo.duoduo.airplayreceiver.ui.ImageActivity;
 import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
@@ -31,15 +33,13 @@ import com.yixia.zi.widget.Toast;
  */
 public class RegisterService extends Service
 {
+    public static final int port = 8192;
     private static final String tag = RegisterService.class.getSimpleName();
-
-    private String airplayName = "GuoDuoTV";
-    private MyController myController;
-    private ServiceHandler handler;
-
     private static final String airplayType = "._airplay._tcp.local";
     private static final String raopType = "._raop._tcp.local";
-
+    private String airplayName = "iTV";
+    private MyController myController;
+    private ServiceHandler handler;
     private InetAddress localAddress;
     private JmDNS jmdnsAirplay = null;
     private JmDNS jmdnsRaop;
@@ -49,20 +49,31 @@ public class RegisterService extends Service
     private HashMap<String, String> values = new HashMap<String, String>();
     private String preMac;
 
-    private RequestListenerThread thread;
+    //    private RequestListenerThread thread;
+
+    private HttpProcess httpProcess;
+
+    private WifiManager.MulticastLock lock;
 
     @Override
     public void onCreate()
     {
         super.onCreate();
 
-        airplayName = android.os.Build.MODEL;
+        Log.d(tag, "register service onCreate");
+
+        WifiManager wifi = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
+        lock = wifi.createMulticastLock("mylockthereturn");
+        lock.setReferenceCounted(true);
+        lock.acquire();
+
+        airplayName = android.os.Build.MODEL + "@" + airplayName;
 
         handler = new ServiceHandler(RegisterService.this);
         myController = new MyController(RegisterService.class.getName(), handler);
 
         Toast.showText(getApplicationContext(), "正在注册Airplay服务...",
-                android.widget.Toast.LENGTH_SHORT);
+            android.widget.Toast.LENGTH_SHORT);
 
         new Thread()
         {
@@ -83,16 +94,33 @@ public class RegisterService extends Service
             }
         }.start();
 
-        try
+        //        try
+        //        {
+        //            thread = new RequestListenerThread();
+        //            thread.setDaemon(false);
+        //            thread.start();
+        //        }
+        //        catch (IOException e)
+        //        {
+        //            e.printStackTrace();
+        //        }
+
+        new Thread()
         {
-            thread = new RequestListenerThread();
-            thread.setDaemon(false);
-            thread.start();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+            public void run()
+            {
+                try
+                {
+                    httpProcess = new HttpProcess();
+                    httpProcess.setHTTPPort(RegisterService.port);
+                    httpProcess.start();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -107,6 +135,8 @@ public class RegisterService extends Service
         Log.d(tag, "RegisterService onDestroy");
         super.onDestroy();
         myController.destroy();
+
+        lock.release();
 
         new Thread()
         {
@@ -123,8 +153,17 @@ public class RegisterService extends Service
             }
         }.start();
 
-        if (thread != null)
-            thread.destroy();
+        //        if (thread != null)
+        //            thread.destroy();
+
+        new Thread()
+        {
+            public void run()
+            {
+                if (httpProcess != null)
+                    httpProcess.stop();
+            }
+        }.start();
     }
 
     @Override
@@ -136,11 +175,17 @@ public class RegisterService extends Service
     private void registerAirplay() throws IOException
     {
         unregisterAirplay(); //每次注册之前先unregister
-        getParams();
-        register();
 
-        Log.d(tag, "airplay register airplay success");
         Message msg = Message.obtain();
+        if (!getParams())
+        {
+            msg.what = Constant.Register.FAIL;
+        }
+        else
+        {
+            register();
+            Log.d(tag, "airplay register airplay success");
+        }
         msg.what = Constant.Register.OK;
         MyApplication.broadcastMessage(msg);
     }
@@ -154,8 +199,8 @@ public class RegisterService extends Service
 
     private void registerTcpLocal() throws IOException
     {
-        airplayService = ServiceInfo.create(airplayName + airplayType, airplayName,
-            RequestListenerThread.port, 0, 0, values);
+        airplayService = ServiceInfo.create(airplayName + airplayType, airplayName, port,
+            0, 0, values);
         jmdnsAirplay = JmDNS.create(localAddress);//create的必须绑定ip地址 android 4.0以上
         jmdnsAirplay.registerService(airplayService);
     }
@@ -163,49 +208,66 @@ public class RegisterService extends Service
     private void registerRaopLocal() throws IOException
     {
         String raopName = preMac + "@" + airplayName;
-        raopService = ServiceInfo.create(raopName + raopType, raopName,
-            RequestListenerThread.port - 1,
+        raopService = ServiceInfo.create(raopName + raopType, raopName, port - 1,
             "tp=UDP sm=false sv=false ek=1 et=0,1 cn=0,1 ch=2 ss=16 "
                 + "sr=44100 pw=false vn=3 da=true md=0,1,2 vs=103.14 txtvers=1");
         jmdnsRaop = JmDNS.create(localAddress);
         jmdnsRaop.registerService(raopService);
     }
 
-    private void getParams()
+    private boolean getParams()
     {
         String strMac = null;
 
         localAddress = NetworkUtils.getLocalIpAddress();//获取本地IP对象
+        if (localAddress == null)
+            return false;
         String[] str_Array = new String[2];
         try
         {
             str_Array = NetworkUtils.getMACAddress(localAddress);
-            strMac = str_Array[0].toUpperCase();
-            preMac = str_Array[1];
+            if (str_Array == null)
+                return false;
+            strMac = str_Array[0].toUpperCase(Locale.ENGLISH);
+            preMac = str_Array[1].toUpperCase(Locale.ENGLISH);
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            return false;
         }
-        Log.d(tag, "airplay 注册Airplay Mac地址：" + strMac);
+        Log.d(tag, "airplay 注册Airplay Mac地址：" + strMac + "; preMac = " + preMac);
 
         values.put("deviceid", strMac);//修改为mac地址
-        values.put("features", "0x39f7"); //new Version iOS
+        values.put("features", "0x297f"); //
         values.put("model", "AppleTV2,1");//
         values.put("srcvers", "130.14");
+
+        return true;
     }
 
     private void unregisterAirplay()
     {
         Log.d(tag, "un register airplay service");
 
-        if (jmdnsAirplay != null && jmdnsRaop != null)
+        if (jmdnsAirplay != null)
         {
-            jmdnsRaop.unregisterService(airplayService);
-            jmdnsAirplay.unregisterService(raopService);
+            jmdnsAirplay.unregisterService(airplayService);
             try
             {
                 jmdnsAirplay.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        if (jmdnsRaop != null)
+        {
+            jmdnsRaop.unregisterService(raopService);
+            try
+            {
                 jmdnsRaop.close();
             }
             catch (IOException e)
@@ -240,6 +302,8 @@ public class RegisterService extends Service
                 case Constant.Register.FAIL :
                     Toast.showText(service.getApplicationContext(), "Airplay注册失败",
                         android.widget.Toast.LENGTH_SHORT);
+                    service.stopSelf();
+                    android.os.Process.killProcess(android.os.Process.myPid()); //完全退出程序
                     break;
                 case Constant.Msg.Msg_Photo :
                 {

@@ -4,6 +4,7 @@
 
 package javax.jmdns.impl;
 
+
 // REMIND: Listener should follow Java idiom for listener or have a different
 // name.
 
@@ -13,16 +14,14 @@ package javax.jmdns.impl;
  * @author Werner Randelshofer, Rick Blair
  * @version 1.0 May 22, 2004 Created.
  */
-interface DNSListener {
+interface DNSListener
+{
     /**
      * Update a DNS record.
      * 
-     * @param dnsCache
-     *            record cache
-     * @param now
-     *            update date
-     * @param record
-     *            DNS record
+     * @param dnsCache record cache
+     * @param now update date
+     * @param record DNS record
      */
     void updateRecord(DNSCache dnsCache, long now, DNSEntry record);
 }
