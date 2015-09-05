@@ -109,6 +109,12 @@ public class RequestListenerThread extends Thread
 
         localAddress = NetworkUtils.getLocalIpAddress();
 
+        if(localAddress == null)
+        {
+            Thread.interrupted();
+            return;
+        }
+
         String[] str_Array = new String[2];
         try
         {

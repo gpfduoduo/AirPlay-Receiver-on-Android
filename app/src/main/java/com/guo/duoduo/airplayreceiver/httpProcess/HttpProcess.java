@@ -415,6 +415,11 @@ public class HttpProcess implements HTTPRequestListener
 
         localAddress = NetworkUtils.getLocalIpAddress();
 
+        if(localAddress == null)
+        {
+            return;
+        }
+
         String[] str_Array = new String[2];
         try
         {
@@ -453,11 +458,14 @@ public class HttpProcess implements HTTPRequestListener
     {
         stop();
 
-        int bindPort = getHTTPPort();
-        HTTPServerList httpServerList = getHTTPServerList();
-        httpServerList.open(bindPort);
-        httpServerList.addRequestListener(this);
-        httpServerList.start();
+        if(localAddress != null)
+        {
+            int bindPort = getHTTPPort();
+            HTTPServerList httpServerList = getHTTPServerList();
+            httpServerList.open(bindPort);
+            httpServerList.addRequestListener(this);
+            httpServerList.start();
+        }
     }
 
     public void stop()

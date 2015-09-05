@@ -14,7 +14,7 @@ import java.util.Enumeration;
 public class NetworkUtils
 {
 
-    public static Inet4Address getLocalIpAddress()
+    public synchronized static Inet4Address getLocalIpAddress()
     {
         try
         {
@@ -42,7 +42,7 @@ public class NetworkUtils
         return null;
     }
 
-    public static String[] getMACAddress(InetAddress ia) throws Exception
+    public synchronized static String[] getMACAddress(InetAddress ia) throws Exception
     {
         //获得网络接口对象（即网卡），并得到mac地址，mac地址存在于一个byte数组中。
         byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
