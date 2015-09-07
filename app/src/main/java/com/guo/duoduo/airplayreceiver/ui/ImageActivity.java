@@ -74,6 +74,8 @@ public class ImageActivity extends Activity
     private void showImage(byte[] pic)
     {
         ByteArrayInputStream bin = new ByteArrayInputStream(pic);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferQualityOverSpeed = true; //提升画质
         Bitmap bit = BitmapFactory.decodeStream(bin);
         iv.setImageBitmap(bit);
     }
@@ -110,6 +112,9 @@ public class ImageActivity extends Activity
             {
                 return;
             }
+            if (activity.isFinishing())
+                return;
+
             switch (msg.what)
             {
                 case Constant.Msg.Msg_Stop :
