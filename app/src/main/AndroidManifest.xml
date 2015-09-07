@@ -34,6 +34,7 @@
             android:launchMode="singleTask" />
         <activity
             android:name=".ui.VideoPlayerActivity"
+            android:screenOrientation="landscape"
             android:configChanges="smallestScreenSize|orientation|screenSize|keyboard|keyboardHidden"
             android:launchMode="singleTask" />
         <activity

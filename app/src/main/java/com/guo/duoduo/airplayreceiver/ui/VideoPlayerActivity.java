@@ -7,14 +7,12 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.PixelFormat;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
@@ -22,7 +20,7 @@ import com.guo.duoduo.airplayreceiver.constant.Constant;
 
 import io.vov.vitamio.LibsChecker;
 import io.vov.vitamio.MediaPlayer;
-import io.vov.vitamio.MediaPlayer.OnBufferingUpdateListener;
+import io.vov.vitamio.widget.VideoView;
 
 
 /**
@@ -30,26 +28,17 @@ import io.vov.vitamio.MediaPlayer.OnBufferingUpdateListener;
  */
 public class VideoPlayerActivity extends Activity
     implements
-        OnBufferingUpdateListener,
         MediaPlayer.OnCompletionListener,
-        MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnVideoSizeChangedListener,
-        SurfaceHolder.Callback
+        MediaPlayer.OnPreparedListener
 {
 
     private static final String tag = "VideoPlayerActivity";
     private static volatile long duration = 0;
     private static volatile long curPosition = 0;
     private static volatile boolean isVideoActivityFinished = false;
-    private int mVideoWidth;
-    private int mVideoHeight;
-    private MediaPlayer mMediaPlayer;
-    private SurfaceView mPreview;
-    private SurfaceHolder holder;
+    private VideoView mVideoView;
     private String mPath;
     private double position;
-    private boolean mIsVideoSizeKnown = false;
-    private boolean mIsVideoReadyToBePlayed = false;
     private Handler handler;
     private MyController controller;
     private Timer timer;
@@ -84,15 +73,18 @@ public class VideoPlayerActivity extends Activity
         if (!LibsChecker.checkVitamioLibs(this))
             return;
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_video);
 
         handler = new VideoHandler(this);
         controller = new MyController(VideoPlayerActivity.class.getName(), handler);
 
-        mPreview = (SurfaceView) findViewById(R.id.surface);
-        holder = mPreview.getHolder();
-        holder.addCallback(this);
-        holder.setFormat(PixelFormat.RGBA_8888);
+        mVideoView = (VideoView) findViewById(R.id.surface);
+
+        playVideo();
 
         timer = new Timer();
         timerTask = new TimerTask()
@@ -100,14 +92,14 @@ public class VideoPlayerActivity extends Activity
             @Override
             public void run()
             {
-                if (mMediaPlayer != null && mMediaPlayer.isPlaying())
+                if (mVideoView != null && mVideoView.isPlaying())
                 {
-                    duration = mMediaPlayer.getDuration();
+                    duration = mVideoView.getDuration();
                 }
                 else
                     duration = 0;
-                if (mMediaPlayer != null && mMediaPlayer.isPlaying())
-                    curPosition = mMediaPlayer.getCurrentPosition();
+                if (mVideoView != null && mVideoView.isPlaying())
+                    curPosition = mVideoView.getCurrentPosition();
                 else
                     curPosition = 0;
             }
@@ -117,7 +109,6 @@ public class VideoPlayerActivity extends Activity
 
     private void playVideo()
     {
-        doCleanUp();
         try
         {
             Intent intent = getIntent();
@@ -129,16 +120,11 @@ public class VideoPlayerActivity extends Activity
             position = intent.getDoubleExtra("position", 0);
             Log.d(tag, "airplay path = " + mPath + "; position = " + position);
 
-            // Create a new media player and set the listeners
-            mMediaPlayer = new MediaPlayer(this);
-            mMediaPlayer.setDataSource(mPath);
-            mMediaPlayer.setDisplay(holder);
-            mMediaPlayer.prepare();
-            mMediaPlayer.setOnBufferingUpdateListener(this);
-            mMediaPlayer.setOnCompletionListener(this);
-            mMediaPlayer.setOnPreparedListener(this);
-            mMediaPlayer.setOnVideoSizeChangedListener(this);
-            setVolumeControlStream(AudioManager.STREAM_MUSIC);
+            mVideoView.setVideoPath(mPath);
+            mVideoView.setOnCompletionListener(this);
+            mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH, 0);
+            mVideoView.requestFocus();
+            mVideoView.start();
         }
         catch (Exception e)
         {
@@ -146,58 +132,12 @@ public class VideoPlayerActivity extends Activity
         }
     }
 
-    public void onBufferingUpdate(MediaPlayer arg0, int percent)
+    @Override
+    protected void onResume()
     {
-        Log.d(tag, "onBufferingUpdate percent:" + percent);
-    }
-
-    public void onCompletion(MediaPlayer arg0)
-    {
-        Log.d(tag, "onCompletion called");
-    }
-
-    public void onVideoSizeChanged(MediaPlayer mp, int width, int height)
-    {
-        Log.v(tag, "onVideoSizeChanged called");
-        if (width == 0 || height == 0)
-        {
-            Log.e(tag, "invalid video width(" + width + ") or height(" + height + ")");
-            return;
-        }
-        mIsVideoSizeKnown = true;
-        mVideoWidth = width;
-        mVideoHeight = height;
-        if (mIsVideoReadyToBePlayed && mIsVideoSizeKnown)
-        {
-            startVideoPlayback();
-        }
-    }
-
-    public void onPrepared(MediaPlayer mediaplayer)
-    {
-        Log.d(tag, "onPrepared called");
-        mIsVideoReadyToBePlayed = true;
-        if (mIsVideoReadyToBePlayed && mIsVideoSizeKnown)
-        {
-            startVideoPlayback();
-        }
-    }
-
-    public void surfaceChanged(SurfaceHolder surfaceholder, int i, int j, int k)
-    {
-        Log.d(tag, "surfaceChanged called");
-
-    }
-
-    public void surfaceDestroyed(SurfaceHolder surfaceholder)
-    {
-        Log.d(tag, "surfaceDestroyed called");
-    }
-
-    public void surfaceCreated(SurfaceHolder holder)
-    {
-        Log.d(tag, "surfaceCreated called");
-        playVideo();
+        super.onResume();
+        if (mVideoView != null)
+            mVideoView.resume();
     }
 
     @Override
@@ -205,8 +145,6 @@ public class VideoPlayerActivity extends Activity
     {
         super.onPause();
         isVideoActivityFinished = true;
-        releaseMediaPlayer();
-        doCleanUp();
     }
 
     @Override
@@ -214,10 +152,11 @@ public class VideoPlayerActivity extends Activity
     {
         super.onDestroy();
         Log.d(tag, "airplay VideoPlayerActivity onDestroy");
-        releaseMediaPlayer();
-        doCleanUp();
         if (controller != null)
             controller.destroy();
+
+        if (mVideoView != null)
+            mVideoView.stopPlayback();
 
         if (timerTask != null)
         {
@@ -231,31 +170,17 @@ public class VideoPlayerActivity extends Activity
         }
     }
 
-    private void releaseMediaPlayer()
+    @Override
+    public void onCompletion(MediaPlayer mp)
     {
-        if (mMediaPlayer != null)
-        {
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-        }
+        finish();
     }
 
-    private void doCleanUp()
+    @Override
+    public void onPrepared(MediaPlayer mp)
     {
-        mVideoWidth = 0;
-        mVideoHeight = 0;
-        mIsVideoReadyToBePlayed = false;
-        mIsVideoSizeKnown = false;
-    }
-
-    private void startVideoPlayback()
-    {
-        Log.v(tag, "startVideoPlayback");
-        holder.setFixedSize(mVideoWidth, mVideoHeight);
-        mMediaPlayer.start();
-        //实现端断点许序播
-        long pos = (long) (mMediaPlayer.getDuration() * position);
-        mMediaPlayer.seekTo(pos);
+        long pos = (long) (mVideoView.getDuration() * position);
+        mVideoView.seekTo(pos);
     }
 
     private static class VideoHandler extends Handler
@@ -275,26 +200,29 @@ public class VideoPlayerActivity extends Activity
             VideoPlayerActivity activity = weakReference.get();
             if (activity == null)
                 return;
+            if (activity.isFinishing())
+                return;
+
             switch (msg.what)
             {
                 case Constant.Msg.Msg_Video_Seek :
                     float posFloat = (float) msg.obj;
                     long pos = Long.valueOf((long) (posFloat * 1000));
                     Log.d(tag, "airplay seek post = " + pos);
-                    activity.mMediaPlayer.seekTo(pos);
+                    activity.mVideoView.seekTo(pos);
                     break;
                 case Constant.Msg.Msg_Stop :
-                    activity.mMediaPlayer.stop();
-                    activity.releaseMediaPlayer();
+                    if (activity.mVideoView != null)
+                        activity.mVideoView.stopPlayback();
                     activity.finish();
                     break;
                 case Constant.Msg.Msg_Video_Pause :
-                    if (activity.mMediaPlayer.isPlaying())
-                        activity.mMediaPlayer.pause();
+                    if (activity.mVideoView.isPlaying())
+                        activity.mVideoView.pause();
                     break;
                 case Constant.Msg.Msg_Video_Resume :
-                    if (!activity.mMediaPlayer.isPlaying())
-                        activity.mMediaPlayer.start();
+                    if (!activity.mVideoView.isPlaying())
+                        activity.mVideoView.start();
                     break;
             }
 
