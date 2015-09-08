@@ -17,9 +17,13 @@ package com.guo.duoduo.airplayreceiver.http;
 
 import java.net.Socket;
 
+import com.guo.duoduo.airplayreceiver.utils.Debug;
+
 
 public class HTTPServerThread extends Thread
 {
+    private static final String tag = HTTPServerThread.class.getSimpleName();
+
     private HTTPServer httpServer;
     private Socket sock;
 
@@ -52,5 +56,6 @@ public class HTTPServerThread extends Thread
                 break;
         }
         httpSock.close();
+        Debug.message(tag, "http sock close");
     }
 }

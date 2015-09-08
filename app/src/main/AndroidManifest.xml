@@ -34,9 +34,16 @@
             android:launchMode="singleTask" />
         <activity
             android:name=".ui.VideoPlayerActivity"
-            android:screenOrientation="landscape"
             android:configChanges="smallestScreenSize|orientation|screenSize|keyboard|keyboardHidden"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name=".ui.VideoPlayerActivity_MediaPlayer"
+            android:configChanges="smallestScreenSize|orientation|screenSize|keyboard|keyboardHidden"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape" />
+
         <activity
             android:name="io.vov.vitamio.activity.InitActivity"
             android:launchMode="singleTop"
