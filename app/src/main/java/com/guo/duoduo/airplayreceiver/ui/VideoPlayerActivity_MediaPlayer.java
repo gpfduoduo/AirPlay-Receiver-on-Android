@@ -45,7 +45,7 @@ public class VideoPlayerActivity_MediaPlayer extends Activity
     private int mVideoWidth;
     private int mVideoHeight;
     private MediaPlayer mMediaPlayer;
-    private VideoView mPreview;
+    private SurfaceView mPreview;
     private SurfaceHolder holder;
     private String mPath;
     private double position;
@@ -85,12 +85,12 @@ public class VideoPlayerActivity_MediaPlayer extends Activity
         if (!LibsChecker.checkVitamioLibs(this))
             return;
 
-        setContentView(R.layout.activity_video_MediaPlayer);
+        setContentView(R.layout.activity_video_mediaplayer);
 
         handler = new VideoHandler(this);
         controller = new MyController(VideoPlayerActivity.class.getName(), handler);
 
-        mPreview = (VideoView) findViewById(R.id.surface);
+        mPreview = (SurfaceView) findViewById(R.id.surface);
         holder = mPreview.getHolder();
         holder.addCallback(this);
         holder.setFormat(PixelFormat.RGBA_8888);

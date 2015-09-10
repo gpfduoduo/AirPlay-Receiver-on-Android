@@ -130,7 +130,7 @@ public interface JmmDNS extends Closeable
      * @see JmDNS#getServiceInfo(String, String, boolean)
      */
     public abstract ServiceInfo[] getServiceInfos(String type, String name,
-            boolean persistent);
+                                                  boolean persistent);
 
     /**
      * Get service information. If the information is not cached, the method
@@ -150,7 +150,7 @@ public interface JmmDNS extends Closeable
      * @see JmDNS#getServiceInfo(String, String, boolean, long)
      */
     public abstract ServiceInfo[] getServiceInfos(String type, String name,
-            boolean persistent, long timeout);
+                                                  boolean persistent, long timeout);
 
     /**
      * Request service information. The information about the service is
@@ -205,7 +205,7 @@ public interface JmmDNS extends Closeable
      * @see JmDNS#requestServiceInfo(String, String, boolean, long)
      */
     public abstract void requestServiceInfo(String type, String name, boolean persistent,
-            long timeout);
+                                            long timeout);
 
     /**
      * Listen for service types.

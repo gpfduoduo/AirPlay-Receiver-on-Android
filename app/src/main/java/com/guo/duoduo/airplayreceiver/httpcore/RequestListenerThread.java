@@ -128,7 +128,7 @@ public class RequestListenerThread extends Thread
             e.printStackTrace();
         }
 
-        serversocket = new ServerSocket(RegisterService.port, 2, localAddress);
+        serversocket = new ServerSocket(RegisterService.AIRPLAY_PORT, 2, localAddress);
 
         params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)

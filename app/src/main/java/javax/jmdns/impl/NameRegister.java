@@ -35,7 +35,7 @@ public interface NameRegister
      *         <code>flase</code> otherwise.
      */
     public abstract boolean checkName(InetAddress networkInterface, String name,
-            NameType type);
+                                      NameType type);
 
     /**
      * Increments a name that is defended by this group of mDNS after it has
@@ -47,7 +47,7 @@ public interface NameRegister
      * @return new name
      */
     public abstract String incrementName(InetAddress networkInterface, String name,
-            NameType type);
+                                         NameType type);
 
     /**
      *

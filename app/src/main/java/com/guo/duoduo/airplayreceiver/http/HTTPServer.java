@@ -156,6 +156,7 @@ public class HTTPServer implements Runnable
             bindAddr = InetAddress.getByName(addr);
             bindPort = port;
             serverSock = new ServerSocket(bindPort, 0, bindAddr);
+            serverSock.setReuseAddress(true);
         }
         catch (IOException e)
         {

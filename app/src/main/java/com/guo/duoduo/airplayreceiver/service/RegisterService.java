@@ -1,9 +1,14 @@
 package com.guo.duoduo.airplayreceiver.service;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -12,6 +17,7 @@ import javax.jmdns.ServiceInfo;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,8 +26,10 @@ import android.util.Log;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.MyController;
+import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
 import com.guo.duoduo.airplayreceiver.httpProcess.HttpProcess;
+import com.guo.duoduo.airplayreceiver.rtsp.LaunchThread;
 import com.guo.duoduo.airplayreceiver.ui.ImageActivity;
 import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
@@ -33,7 +41,8 @@ import com.yixia.zi.widget.Toast;
  */
 public class RegisterService extends Service
 {
-    public static final int port = 8192;
+    public static final int AIRPLAY_PORT = 8192;
+    public static final int RAOP_PORT = 5000;
     private static final String tag = RegisterService.class.getSimpleName();
     private static final String airplayType = "._airplay._tcp.local";
     private static final String raopType = "._raop._tcp.local";
@@ -52,7 +61,9 @@ public class RegisterService extends Service
     //    private RequestListenerThread thread;
 
     private HttpProcess httpProcess;
+    private LaunchThread raopThread;
 
+    public static PrivateKey pk;
     private WifiManager.MulticastLock lock;
 
     @Override
@@ -66,6 +77,18 @@ public class RegisterService extends Service
         lock = wifi.createMulticastLock("mylockthereturn");
         lock.setReferenceCounted(true);
         lock.acquire();
+
+        try
+        {
+            Resources resources = this.getResources();
+            InputStream is = resources.openRawResource(R.raw.key);
+            pk = KeyFactory.getInstance("RSA").generatePrivate(
+                new PKCS8EncodedKeySpec(getByteArrayFromStream(is)));
+        }
+        catch (Exception e)
+        {
+            throw new IllegalStateException(e);
+        }
 
         airplayName = android.os.Build.MODEL + "@" + airplayName;
 
@@ -82,6 +105,13 @@ public class RegisterService extends Service
                 try
                 {
                     registerAirplay();
+
+                    httpProcess = new HttpProcess();
+                    httpProcess.setHTTPPort(RegisterService.AIRPLAY_PORT);
+                    httpProcess.start();
+
+                    raopThread = new LaunchThread(RAOP_PORT);
+                    raopThread.start();
                 }
                 catch (IOException e)
                 {
@@ -105,22 +135,6 @@ public class RegisterService extends Service
         //            e.printStackTrace();
         //        }
 
-        new Thread()
-        {
-            public void run()
-            {
-                try
-                {
-                    httpProcess = new HttpProcess();
-                    httpProcess.setHTTPPort(RegisterService.port);
-                    httpProcess.start();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
     }
 
     @Override
@@ -145,6 +159,17 @@ public class RegisterService extends Service
                 try
                 {
                     unregisterAirplay();
+
+                    //        if (thread != null)
+                    //            thread.destroy();
+
+                    if (httpProcess != null)
+                        httpProcess.stop();
+
+                    if (raopThread != null)
+                    {
+                        raopThread.destroy();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -153,17 +178,6 @@ public class RegisterService extends Service
             }
         }.start();
 
-        //        if (thread != null)
-        //            thread.destroy();
-
-        new Thread()
-        {
-            public void run()
-            {
-                if (httpProcess != null)
-                    httpProcess.stop();
-            }
-        }.start();
     }
 
     @Override
@@ -174,8 +188,6 @@ public class RegisterService extends Service
 
     private void registerAirplay() throws IOException
     {
-        unregisterAirplay(); //每次注册之前先unregister
-
         Message msg = Message.obtain();
         if (!getParams())
         {
@@ -199,8 +211,8 @@ public class RegisterService extends Service
 
     private void registerTcpLocal() throws IOException
     {
-        airplayService = ServiceInfo.create(airplayName + airplayType, airplayName, port,
-            0, 0, values);
+        airplayService = ServiceInfo.create(airplayName + airplayType, airplayName,
+            AIRPLAY_PORT, 0, 0, values);
         jmdnsAirplay = JmDNS.create(localAddress);//create的必须绑定ip地址 android 4.0以上
         jmdnsAirplay.registerService(airplayService);
     }
@@ -208,7 +220,7 @@ public class RegisterService extends Service
     private void registerRaopLocal() throws IOException
     {
         String raopName = preMac + "@" + airplayName;
-        raopService = ServiceInfo.create(raopName + raopType, raopName, port - 1,
+        raopService = ServiceInfo.create(raopName + raopType, raopName, RAOP_PORT,
             "tp=UDP sm=false sv=false ek=1 et=0,1 cn=0,1 ch=2 ss=16 "
                 + "sr=44100 pw=false vn=3 da=true md=0,1,2 vs=103.14 txtvers=1");
         jmdnsRaop = JmDNS.create(localAddress);
@@ -219,9 +231,21 @@ public class RegisterService extends Service
     {
         String strMac = null;
 
+        try
+        {
+            Thread.sleep(2 * 1000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
         localAddress = NetworkUtils.getLocalIpAddress();//获取本地IP对象
         if (localAddress == null)
+        {
+            Log.d(tag, "local address = null");
             return false;
+        }
         String[] str_Array = new String[2];
         try
         {
@@ -275,6 +299,18 @@ public class RegisterService extends Service
                 e.printStackTrace();
             }
         }
+    }
+
+    private byte[] getByteArrayFromStream(InputStream is) throws IOException
+    {
+        byte[] b = new byte[10000];
+        int read;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        while ((read = is.read(b, 0, b.length)) > 0)
+        {
+            out.write(b, 0, read);
+        }
+        return out.toByteArray();
     }
 
     private static class ServiceHandler extends Handler

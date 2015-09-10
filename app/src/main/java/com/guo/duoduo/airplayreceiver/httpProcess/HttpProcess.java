@@ -79,7 +79,7 @@ public class HttpProcess implements HTTPRequestListener
             String content = Constant.getServerInfoResponse(localMac
                     .toUpperCase(Locale.ENGLISH));
             response.setHeader("Content-Length", content.length());
-            response.setContent(content);
+            response.setContent("\n" + content);
 
             Debug.d(tag, "server info response = \r\n" + response.toString());
             httpReq.post(response);
@@ -245,15 +245,15 @@ public class HttpProcess implements HTTPRequestListener
                                 int endIndex = strContent.indexOf("\"");
                                 playUrl = strContent.substring(startIndex, endIndex);
                                 Debug.d(tag, "爱奇艺 视频地址：" + playUrl);
-
-                                Message msg = Message.obtain();
-                                HashMap<String, String> mapUrl = new HashMap<String, String>();
-                                mapUrl.put(Constant.PlayURL, playUrl);
-                                mapUrl.put(Constant.Start_Pos, Double.toString(startPos));
-                                msg.what = Constant.Msg.Msg_Video_Play;
-                                msg.obj = mapUrl;
-                                MyApplication.getInstance().broadcastMessage(msg);
                             }
+
+                            Message msg = Message.obtain();
+                            HashMap<String, String> mapUrl = new HashMap<String, String>();
+                            mapUrl.put(Constant.PlayURL, playUrl);
+                            mapUrl.put(Constant.Start_Pos, Double.toString(startPos));
+                            msg.what = Constant.Msg.Msg_Video_Play;
+                            msg.obj = mapUrl;
+                            MyApplication.getInstance().broadcastMessage(msg);
                         } catch (UnsupportedEncodingException e)
                         {
                             e.printStackTrace();
@@ -406,7 +406,6 @@ public class HttpProcess implements HTTPRequestListener
         {
 
         }
-
     }
 
     private void initHttpServer() throws IOException
@@ -436,7 +435,7 @@ public class HttpProcess implements HTTPRequestListener
         InetAddress[] binds = new InetAddress[1];
         binds[0] = localAddress;
 
-        httpServerList = new HTTPServerList(binds, RegisterService.port);
+        httpServerList = new HTTPServerList(binds, RegisterService.AIRPLAY_PORT);
     }
 
     public int getHTTPPort()
@@ -471,8 +470,11 @@ public class HttpProcess implements HTTPRequestListener
     public void stop()
     {
         HTTPServerList httpServerList = getHTTPServerList();
-        httpServerList.stop();
-        httpServerList.close();
-        httpServerList.clear();
+        if(httpServerList != null)
+        {
+            httpServerList.stop();
+            httpServerList.close();
+            httpServerList.clear();
+        }
     }
 }

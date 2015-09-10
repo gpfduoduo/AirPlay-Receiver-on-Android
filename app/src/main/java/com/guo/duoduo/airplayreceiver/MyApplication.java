@@ -51,7 +51,6 @@ public class MyApplication extends Application
         NetWorkReceiver netWorkReceiver = new NetWorkReceiver();
         IntentFilter wifiFilter = new IntentFilter();
         wifiFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        wifiFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(netWorkReceiver, wifiFilter);
     }
 

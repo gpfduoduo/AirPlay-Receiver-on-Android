@@ -79,7 +79,7 @@ public interface NetworkTopologyDiscovery
      *         <code>false</code> otherwise.
      */
     public boolean useInetAddress(NetworkInterface networkInterface,
-            InetAddress interfaceAddress);
+                                  InetAddress interfaceAddress);
 
     /**
      * Locks the given InetAddress if the device requires it.
