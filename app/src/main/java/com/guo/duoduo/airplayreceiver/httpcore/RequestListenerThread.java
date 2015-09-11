@@ -159,6 +159,7 @@ public class RequestListenerThread extends Thread
         try
         {
             this.serversocket.close();
+            this.interrupt();
         }
         catch (Exception e)
         {
