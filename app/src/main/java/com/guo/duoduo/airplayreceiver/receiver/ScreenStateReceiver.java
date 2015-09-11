@@ -25,17 +25,18 @@ public class ScreenStateReceiver extends BroadcastReceiver
         if (Intent.ACTION_SCREEN_OFF.equals(action))
         {
             Log.d(tag, "action screen off");
-            if(NetworkUtils.isWifiConnected(MyApplication.getInstance()))
-            {
+
                 MyApplication.getInstance().stopService(
                         new Intent(MyApplication.getInstance(), RegisterService.class));
-            }
         }
         else if (Intent.ACTION_SCREEN_ON.equals(action))
         {
             Log.d(tag, "action screen on");
-            MyApplication.getInstance().startService(
-                new Intent(MyApplication.getInstance(), RegisterService.class));
+            if(NetworkUtils.isWifiConnected(MyApplication.getInstance()))
+            {
+                MyApplication.getInstance().startService(
+                        new Intent(MyApplication.getInstance(), RegisterService.class));
+            }
         }
 
     }
