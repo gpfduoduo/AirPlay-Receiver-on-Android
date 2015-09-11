@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.service.RegisterService;
+import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
 
 
 public class ScreenStateReceiver extends BroadcastReceiver
@@ -24,8 +25,11 @@ public class ScreenStateReceiver extends BroadcastReceiver
         if (Intent.ACTION_SCREEN_OFF.equals(action))
         {
             Log.d(tag, "action screen off");
-            MyApplication.getInstance().stopService(
-                new Intent(MyApplication.getInstance(), RegisterService.class));
+            if(NetworkUtils.isWifiConnected(MyApplication.getInstance()))
+            {
+                MyApplication.getInstance().stopService(
+                        new Intent(MyApplication.getInstance(), RegisterService.class));
+            }
         }
         else if (Intent.ACTION_SCREEN_ON.equals(action))
         {
