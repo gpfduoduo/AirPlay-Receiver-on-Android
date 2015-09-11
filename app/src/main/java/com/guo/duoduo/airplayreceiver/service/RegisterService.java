@@ -31,6 +31,7 @@ import com.guo.duoduo.airplayreceiver.MyController;
 import com.guo.duoduo.airplayreceiver.R;
 import com.guo.duoduo.airplayreceiver.constant.Constant;
 import com.guo.duoduo.airplayreceiver.httpProcess.HttpProcess;
+import com.guo.duoduo.airplayreceiver.httpcore.RequestListenerThread;
 import com.guo.duoduo.airplayreceiver.rtsp.LaunchThread;
 import com.guo.duoduo.airplayreceiver.ui.ImageActivity;
 import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
@@ -59,7 +60,7 @@ public class RegisterService extends Service
     private HashMap<String, String> values = new HashMap<String, String>();
     private String preMac;
 
-    //    private RequestListenerThread thread;
+    private RequestListenerThread thread;
 
     private HttpProcess httpProcess;
     private LaunchThread raopThread;
@@ -101,42 +102,42 @@ public class RegisterService extends Service
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
 
-        new Thread()
+        //        new Thread()
+        //        {
+        //            public void run()
+        //            {
+        //                try
+        //                {
+        //                    registerAirplay();
+        //
+        //                    httpProcess = new HttpProcess();
+        //                    httpProcess.setHTTPPort(RegisterService.AIRPLAY_PORT);
+        //                    httpProcess.start();
+        //
+        //                    raopThread = new LaunchThread(RAOP_PORT);
+        //                    raopThread.start();
+        //                }
+        //                catch (IOException e)
+        //                {
+        //                    e.printStackTrace();
+        //                    Message msg = Message.obtain();
+        //                    msg.what = Constant.Register.FAIL;
+        //                    MyApplication.broadcastMessage(msg);
+        //                    return;
+        //                }
+        //            }
+        //        }.start();
+
+        try
         {
-            public void run()
-            {
-                try
-                {
-                    registerAirplay();
-
-                    httpProcess = new HttpProcess();
-                    httpProcess.setHTTPPort(RegisterService.AIRPLAY_PORT);
-                    httpProcess.start();
-
-                    raopThread = new LaunchThread(RAOP_PORT);
-                    raopThread.start();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                    Message msg = Message.obtain();
-                    msg.what = Constant.Register.FAIL;
-                    MyApplication.broadcastMessage(msg);
-                    return;
-                }
-            }
-        }.start();
-
-        //        try
-        //        {
-        //            thread = new RequestListenerThread();
-        //            thread.setDaemon(false);
-        //            thread.start();
-        //        }
-        //        catch (IOException e)
-        //        {
-        //            e.printStackTrace();
-        //        }
+            thread = new RequestListenerThread();
+            thread.setDaemon(false);
+            thread.start();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
     }
 
@@ -163,16 +164,16 @@ public class RegisterService extends Service
                 {
                     unregisterAirplay();
 
-                    //        if (thread != null)
-                    //            thread.destroy();
+                    if (thread != null)
+                        thread.destroy();
 
-                    if (httpProcess != null)
-                        httpProcess.stop();
-
-                    if (raopThread != null)
-                    {
-                        raopThread.destroy();
-                    }
+                    //                    if (httpProcess != null)
+                    //                        httpProcess.stop();
+                    //
+                    //                    if (raopThread != null)
+                    //                    {
+                    //                        raopThread.destroy();
+                    //                    }
                 }
                 catch (Exception e)
                 {
