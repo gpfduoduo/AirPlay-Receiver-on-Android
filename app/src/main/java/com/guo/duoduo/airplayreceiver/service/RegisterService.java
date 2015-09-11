@@ -48,7 +48,7 @@ public class RegisterService extends Service
     private static final String tag = RegisterService.class.getSimpleName();
     private static final String airplayType = "._airplay._tcp.local";
     private static final String raopType = "._raop._tcp.local";
-    private String airplayName = "iTV";
+    private String airplayName = "郭攀峰";
     private MyController myController;
     private ServiceHandler handler;
     private InetAddress localAddress;
