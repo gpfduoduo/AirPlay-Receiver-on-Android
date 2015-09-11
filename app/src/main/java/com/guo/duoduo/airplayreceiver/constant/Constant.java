@@ -192,6 +192,8 @@ public class Constant
         public static final String SCRUB = "/scrub";
         public static final String RATE = "/rate";
         public static final String PLAYBACK_INFO = "/playback-info";
+
+        public static final String SLIDER_SHOW = "slideshow-features";
     }
 
     public interface Status

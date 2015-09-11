@@ -32,6 +32,8 @@ import com.guo.duoduo.airplayreceiver.utils.BplistParser;
 import com.guo.duoduo.airplayreceiver.utils.Debug;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
 
+import io.vov.vitamio.MediaPlayer;
+
 
 /**
  * Created by Guo.Duo duo on 2015/8/31.
@@ -54,6 +56,7 @@ public class HttpProcess implements HTTPRequestListener
             .synchronizedMap(new HashMap<String, byte[]>());
 
     private boolean isPlayingPhoto = false;
+    private boolean isSlideShow = false;
 
     public HttpProcess() throws IOException
     {
@@ -93,6 +96,16 @@ public class HttpProcess implements HTTPRequestListener
                 Debug.d(tag, "reverse session id = " + reverseSessionId);
             }
 
+            HTTPHeader purposeHeader = httpReq.getHeader("X-Apple-Purpose");
+            if(purposeHeader != null)
+            {
+                String purpose = purposeHeader.getValue();
+                Debug.d(tag, "http reverse session purpose = " + purpose);
+                if(purpose != null && purpose.equals("slideshow"))
+                {
+                    isSlideShow = true;
+                }
+            }
             reverseSocket = httpReq.getSocket();
 
             HTTPResponse response = new HTTPResponse();
@@ -162,6 +175,20 @@ public class HttpProcess implements HTTPRequestListener
                     MyApplication.broadcastMessage(msg);
                 }
             }
+
+            httpReq.post(response);
+        }
+        else if(target.equals(Constant.Target.SLIDER_SHOW))
+        {
+            HTTPResponse response = new HTTPResponse();
+
+            String returnContent = "";
+
+
+            response.setStatusCode(HttpStatus.SC_OK);
+            response.setHeader("Date", new Date().toString());
+            response.setHeader("Content-Type", "text/x-apple-plist+xml");
+            response.setHeader("Content-Length", returnContent.length());
 
             httpReq.post(response);
         }

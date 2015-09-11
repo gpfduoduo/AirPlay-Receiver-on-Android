@@ -23,6 +23,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.guo.duoduo.airplayreceiver.MyApplication;
 import com.guo.duoduo.airplayreceiver.MyController;
@@ -33,7 +35,6 @@ import com.guo.duoduo.airplayreceiver.rtsp.LaunchThread;
 import com.guo.duoduo.airplayreceiver.ui.ImageActivity;
 import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
-import com.yixia.zi.widget.Toast;
 
 
 /**
@@ -95,8 +96,10 @@ public class RegisterService extends Service
         handler = new ServiceHandler(RegisterService.this);
         myController = new MyController(RegisterService.class.getName(), handler);
 
-        Toast.showText(getApplicationContext(), "正在注册Airplay服务...",
-            android.widget.Toast.LENGTH_SHORT);
+        Toast toast = android.widget.Toast.makeText(getApplicationContext(),
+            "正在注册Airplay服务...", android.widget.Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
 
         new Thread()
         {
@@ -332,15 +335,23 @@ public class RegisterService extends Service
             switch (msg.what)
             {
                 case Constant.Register.OK :
-                    Toast.showText(service.getApplicationContext(), "Airplay注册成功",
-                        android.widget.Toast.LENGTH_SHORT);
+                {
+                    Toast toast = Toast.makeText(service.getApplicationContext(),
+                        "Airplay注册成功", android.widget.Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
                     break;
                 case Constant.Register.FAIL :
-                    Toast.showText(service.getApplicationContext(), "Airplay注册失败",
-                        android.widget.Toast.LENGTH_SHORT);
+                {
+                    Toast toast = Toast.makeText(service.getApplicationContext(),
+                        "Airplay注册失败", android.widget.Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
                     service.stopSelf();
                     android.os.Process.killProcess(android.os.Process.myPid()); //完全退出程序
                     break;
+                }
                 case Constant.Msg.Msg_Photo :
                 {
                     byte[] pic = (byte[]) msg.obj;
