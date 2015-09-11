@@ -120,6 +120,9 @@ public class ImageActivity extends Activity
                 case Constant.Msg.Msg_Stop :
                     activity.finish();
                     break;
+                case Constant.Msg.Msg_Video_Play :
+                    activity.finish();
+                    break;
             }
         }
     }

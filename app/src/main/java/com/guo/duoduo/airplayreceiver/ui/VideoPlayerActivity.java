@@ -224,6 +224,9 @@ public class VideoPlayerActivity extends Activity
                     if (!activity.mVideoView.isPlaying())
                         activity.mVideoView.start();
                     break;
+                case Constant.Msg.Msg_Photo :
+                    activity.finish();
+                    break;
             }
 
         }
