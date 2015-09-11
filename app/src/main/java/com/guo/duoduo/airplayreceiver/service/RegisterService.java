@@ -102,43 +102,35 @@ public class RegisterService extends Service
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
 
-        //        new Thread()
-        //        {
-        //            public void run()
-        //            {
-        //                try
-        //                {
-        //                    registerAirplay();
-        //
-        //                    httpProcess = new HttpProcess();
-        //                    httpProcess.setHTTPPort(RegisterService.AIRPLAY_PORT);
-        //                    httpProcess.start();
-        //
-        //                    raopThread = new LaunchThread(RAOP_PORT);
-        //                    raopThread.start();
-        //                }
-        //                catch (IOException e)
-        //                {
-        //                    e.printStackTrace();
-        //                    Message msg = Message.obtain();
-        //                    msg.what = Constant.Register.FAIL;
-        //                    MyApplication.broadcastMessage(msg);
-        //                    return;
-        //                }
-        //            }
-        //        }.start();
-
-        try
+        new Thread()
         {
-            thread = new RequestListenerThread();
-            thread.setDaemon(false);
-            thread.start();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+            public void run()
+            {
+                try
+                {
+                    thread = new RequestListenerThread();
+                    thread.setDaemon(false);
+                    thread.start();
 
+                    registerAirplay();
+
+                    //                            httpProcess = new HttpProcess();
+                    //                            httpProcess.setHTTPPort(RegisterService.AIRPLAY_PORT);
+                    //                            httpProcess.start();
+                    //
+                    //                            raopThread = new LaunchThread(RAOP_PORT);
+                    //                            raopThread.start();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    Message msg = Message.obtain();
+                    msg.what = Constant.Register.FAIL;
+                    MyApplication.broadcastMessage(msg);
+                    return;
+                }
+            }
+        }.start();
     }
 
     @Override
