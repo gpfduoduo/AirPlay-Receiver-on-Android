@@ -70,19 +70,34 @@ public class RequestListenerThread extends Thread
     private InetAddress localAddress;
     private MyHttpService httpService;
 
-    public RequestListenerThread() throws IOException
+    public RequestListenerThread()
     {
-        initHttpServer();
     }
 
     public void run()
     {
+        try
+        {
+            Thread.sleep(2 * 1000);
+            initHttpServer();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
         ExecutorService exec = Executors.newCachedThreadPool();
 
         while (!Thread.interrupted())
         {
             try
             {
+                if (serversocket == null)
+                    break;
+
                 Socket socket = this.serversocket.accept();
                 Log.d(tag, "airplay incoming connection from " + socket.getInetAddress()
                     + "; socket id= [" + socket + "]");
@@ -101,6 +116,7 @@ public class RequestListenerThread extends Thread
             }
         }
         exec.shutdown();
+        Log.d(tag, "exec shut down");
     }
 
     private void initHttpServer() throws IOException
@@ -109,7 +125,7 @@ public class RequestListenerThread extends Thread
 
         localAddress = NetworkUtils.getLocalIpAddress();
 
-        if(localAddress == null)
+        if (localAddress == null)
         {
             Thread.interrupted();
             return;
@@ -129,6 +145,7 @@ public class RequestListenerThread extends Thread
         }
 
         serversocket = new ServerSocket(RegisterService.AIRPLAY_PORT, 2, localAddress);
+        serversocket.setReuseAddress(true);
 
         params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
@@ -154,6 +171,7 @@ public class RequestListenerThread extends Thread
         httpService.setHandlerResolver(registry);//为http服务设置注册好的请求处理器。
     }
 
+    @Override
     public void destroy()
     {
         try
@@ -523,7 +541,7 @@ public class RequestListenerThread extends Thread
                         duration = duration < 0 ? 0 : duration;
                         curPos = curPos < 0 ? 0 : curPos;
                         Log.d(tag, "airplay get method scrub: duration=" + duration
-                                + "; position=" + curPos);
+                            + "; position=" + curPos);
 
                         //毫秒需要转为秒
                         DecimalFormat decimalFormat = new DecimalFormat(".000000");//
