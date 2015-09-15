@@ -8,6 +8,10 @@
 4、airplay发现android设备，你可以随便修改自己的名称，例如显示：我的电视 等  
 5、视频播放时，android和ipone是同步的，时间一致。 
 
+##注意
+本项目只是针对IOS8.4.1之前的版本，最新的IOS9 apple对airplay进行了修改，具体的可以看一下xmbc等开源实现对其的实现情况，或者自己抓包研究最新的airplay协议。   
+
+
 未实现：  
 1、腾讯视频推送airplay与优酷不一样，里面牵扯到了RTSP，不是单纯的HTTP。下一步继续研究。  
 2、android客户端先启动，iphone后启动，iphone怎样发现android，由于服务注册发现使用的第三方jmdns。因此还需要进一步研究M_DNS和DNS_SD。
