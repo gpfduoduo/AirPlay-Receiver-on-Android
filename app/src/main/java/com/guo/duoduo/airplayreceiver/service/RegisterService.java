@@ -152,20 +152,20 @@ public class RegisterService extends Service
         {
             public void run()
             {
+                if (thread != null) //airplay关闭服务很慢，将thread关闭放在前面
+                    thread.destroy();
+
+                //                    if (httpProcess != null)
+                //                        httpProcess.stop();
+                //
+                //                    if (raopThread != null)
+                //                    {
+                //                        raopThread.destroy();
+                //                    }
+
                 try
                 {
                     unregisterAirplay();
-
-                    if (thread != null)
-                        thread.destroy();
-
-                    //                    if (httpProcess != null)
-                    //                        httpProcess.stop();
-                    //
-                    //                    if (raopThread != null)
-                    //                    {
-                    //                        raopThread.destroy();
-                    //                    }
                 }
                 catch (Exception e)
                 {

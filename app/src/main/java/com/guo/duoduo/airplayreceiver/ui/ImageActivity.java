@@ -1,7 +1,6 @@
 package com.guo.duoduo.airplayreceiver.ui;
 
 
-import java.io.ByteArrayInputStream;
 import java.lang.ref.WeakReference;
 
 import android.app.Activity;
@@ -73,11 +72,26 @@ public class ImageActivity extends Activity
 
     private void showImage(byte[] pic)
     {
-        ByteArrayInputStream bin = new ByteArrayInputStream(pic);
+        //感谢  MilesChan 2015-09-18
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferQualityOverSpeed = true; //提升画质
-        Bitmap bit = BitmapFactory.decodeStream(bin);
-        iv.setImageBitmap(bit);
+
+        int size = (options.outWidth * options.outHeight);
+        int size_limit = 1920 * 1080 * 4;
+        if (size > 1920 * 1080 * 4)
+        {
+            int zoomRate = (int) Math.ceil(size * 1.0 / size_limit);
+            if (zoomRate <= 0)
+                zoomRate = 1;
+            options.inSampleSize = zoomRate;
+        }
+
+        if (!Thread.currentThread().isInterrupted())
+        {
+            options.inJustDecodeBounds = false;
+            Bitmap bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
+            iv.setImageBitmap(bitmap);
+        }
     }
 
     public void onBackPressed()

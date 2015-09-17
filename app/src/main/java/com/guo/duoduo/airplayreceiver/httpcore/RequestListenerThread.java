@@ -119,6 +119,21 @@ public class RequestListenerThread extends Thread
         Log.d(tag, "exec shut down");
     }
 
+    @Override
+    public void destroy()
+    {
+        try
+        {
+            Log.d(tag, "serverSocket destroy");
+            this.interrupt();
+            this.serversocket.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     private void initHttpServer() throws IOException
     {
         Log.d(tag, "airplay init http server");
@@ -169,20 +184,6 @@ public class RequestListenerThread extends Thread
             new DefaultConnectionReuseStrategy(), new DefaultHttpResponseFactory());
         httpService.setParams(this.params);
         httpService.setHandlerResolver(registry);//为http服务设置注册好的请求处理器。
-    }
-
-    @Override
-    public void destroy()
-    {
-        try
-        {
-            this.serversocket.close();
-            this.interrupt();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 
     private static class WorkerThread extends Thread
@@ -270,6 +271,7 @@ public class RequestListenerThread extends Thread
             {
                 try
                 {
+                    Log.d(tag, "connection shutdown");
                     this.conn.shutdown();
                 }
                 catch (IOException e)
