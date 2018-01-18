@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
     <eat-comment/>
     <color name="btn_selected_color">#028b85</color>
     <color name="cropimage_btn">#77777777</color>
@@ -13,7 +13,7 @@
     <color name="theme_color">#53c1bd</color>
     <declare-styleable name="PinProgressButton"><attr format="boolean" name="pinned"/><attr format="integer" name="progress"/><attr format="integer" name="max"/><attr format="color" name="circleColor"/><attr format="color" name="progressColor"/></declare-styleable>
     <dimen name="pin_progress_inner_size">28dp</dimen>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/res/values/strings.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/res/values/strings.xml -->
     <eat-comment/>
     <string name="VideoView_error_button">OK</string>
     <string name="VideoView_error_text_invalid_progressive_playback">Sorry, this video is not valid for streaming to
@@ -21,7 +21,7 @@
     </string>
     <string name="VideoView_error_text_unknown">Sorry, this video cannot be played.</string>
     <string name="VideoView_error_title">Cannot play video</string>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
     <eat-comment/>
     <string name="cropimage_face_multiple">Multi face crop help</string>
     <string name="cropimage_image_discard">Discard</string>
@@ -36,7 +36,7 @@
     <string name="cropimage_wallpaper_failed">Set wallpaper failed!</string>
     <string name="cropimage_wallpaper_is_setting">Applying wallpaper…</string>
     <string name="cropimage_wallpaper_success">Wallpaper changed!</string>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/res/values/strings.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/res/values/strings.xml -->
     <eat-comment/>
     <string name="mediacontroller_play_pause">Play/Pause</string>
     <string name="permission_group_tools_description">Access Vitamio package and resources.</string>
@@ -48,7 +48,7 @@
     <string name="permission_write_providers_label">Write Vitamio providers</string>
     <string name="vitamio_init_decoders">Initializing decoders…</string>
     <string name="vitamio_library_app_name">VitamioLibrary</string>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
     <eat-comment/>
     <string name="zi_app_name">ZI</string>
     <style name="Animations"/>
@@ -86,7 +86,7 @@
         <item name="@android:windowEnterAnimation">@anim/grow_from_bottomright_to_topleft</item>
         <item name="@android:windowExitAnimation">@anim/shrink_from_topleft_to_bottomright</item>
     </style>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/res/values/styles.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/res/values/styles.xml -->
     <eat-comment/>
     <style name="MediaController_SeekBar">
         <item name="android:minHeight">16dip</item>
@@ -99,7 +99,7 @@
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/values/values.xml -->
     <eat-comment/>
     <style name="PinProgressButton">
         <item name="android:clickable">false</item>

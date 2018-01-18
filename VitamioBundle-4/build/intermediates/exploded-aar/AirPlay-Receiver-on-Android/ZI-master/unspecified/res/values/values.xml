@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/values/colors.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/values/colors.xml -->
     <eat-comment/>
     <color name="btn_selected_color">#028b85</color>
     <color name="cropimage_btn">#77777777</color>
@@ -12,10 +12,10 @@
     <color name="seekbar_buffer_color">#33B5E5</color>
     <color name="theme_color">#53c1bd</color>
     <declare-styleable name="PinProgressButton"><attr format="boolean" name="pinned"/><attr format="integer" name="progress"/><attr format="integer" name="max"/><attr format="color" name="circleColor"/><attr format="color" name="progressColor"/></declare-styleable>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/values/dimens.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/values/dimens.xml -->
     <eat-comment/>
     <dimen name="pin_progress_inner_size">28dp</dimen>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/values/strings.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/values/strings.xml -->
     <eat-comment/>
     <string name="cropimage_face_multiple">Multi face crop help</string>
     <string name="cropimage_image_discard">Discard</string>
@@ -31,7 +31,7 @@
     <string name="cropimage_wallpaper_is_setting">Applying wallpaper…</string>
     <string name="cropimage_wallpaper_success">Wallpaper changed!</string>
     <string name="zi_app_name">ZI</string>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/values/styles.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/values/styles.xml -->
     <eat-comment/>
     <style name="Animations"/>
     <style name="Animations.PopDownMenu"/>
@@ -73,7 +73,7 @@
         <item name="android:focusable">false</item>
         <!--  <item name="android:background">?android:selectableItemBackground</item>-->
     </style>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/values/themes.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/values/themes.xml -->
     <eat-comment/>
     <style name="Theme.ZI.Black" parent="@android:Theme">
 		<item name="android:checkboxStyle">@style/Widget.ZI.CheckBox</item>
@@ -92,7 +92,7 @@
 		<item name="android:windowIsTranslucent">true</item>
 		<item name="android:windowIsFloating">true</item>
 	</style>
-    <!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/values/styles.xml -->
+    <!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/values/styles.xml -->
     <eat-comment/>
     <style name="Widget.ZI.Button" parent="android:Widget.Button">
         <item name="android:background">@drawable/btn_default_holo_dark</item>

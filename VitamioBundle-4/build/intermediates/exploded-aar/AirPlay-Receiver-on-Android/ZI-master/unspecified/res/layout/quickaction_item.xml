@@ -8,4 +8,4 @@
 	<TextView android:id="@+id/tv_title" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:gravity="center_vertical"
 		android:textColor="#fff" />
-</LinearLayout><!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/layout/quickaction_item.xml -->
+</LinearLayout><!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/layout/quickaction_item.xml -->

@@ -6,4 +6,4 @@
     <item android:drawable="@drawable/mediacontroller_pause02" android:state_focused="false" android:state_pressed="true"/>
     <item android:drawable="@drawable/mediacontroller_pause01"/>
 
-</selector><!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/res/drawable/mediacontroller_pause_button.xml -->
+</selector><!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/res/drawable/mediacontroller_pause_button.xml -->

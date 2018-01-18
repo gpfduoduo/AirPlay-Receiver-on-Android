@@ -11,4 +11,4 @@
 		android:fromAlpha="1.0" android:toAlpha="0.0"
 		android:duration="@android:integer/config_shortAnimTime"
 	/>
-</set><!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/anim/shrink_from_topleft_to_bottomright.xml -->
+</set><!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/anim/shrink_from_topleft_to_bottomright.xml -->

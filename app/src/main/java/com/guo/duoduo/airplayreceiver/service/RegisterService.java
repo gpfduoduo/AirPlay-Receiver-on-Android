@@ -34,6 +34,7 @@ import com.guo.duoduo.airplayreceiver.httpProcess.HttpProcess;
 import com.guo.duoduo.airplayreceiver.httpcore.RequestListenerThread;
 import com.guo.duoduo.airplayreceiver.rtsp.LaunchThread;
 import com.guo.duoduo.airplayreceiver.ui.ImageActivity;
+import com.guo.duoduo.airplayreceiver.ui.MainActivity;
 import com.guo.duoduo.airplayreceiver.ui.VideoPlayerActivity;
 import com.guo.duoduo.airplayreceiver.utils.NetworkUtils;
 
@@ -48,7 +49,7 @@ public class RegisterService extends Service
     private static final String tag = RegisterService.class.getSimpleName();
     private static final String airplayType = "._airplay._tcp.local";
     private static final String raopType = "._raop._tcp.local";
-    private String airplayName = "郭攀峰";
+    private String airplayName = "xxx";
     private MyController myController;
     private ServiceHandler handler;
     private InetAddress localAddress;
@@ -68,6 +69,8 @@ public class RegisterService extends Service
     public static PrivateKey pk;
     private WifiManager.MulticastLock lock;
 
+    private String TAG = MainActivity.TAG;
+
     @Override
     public void onCreate()
     {
@@ -77,18 +80,19 @@ public class RegisterService extends Service
 
         WifiManager wifi = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
         lock = wifi.createMulticastLock("mylockthereturn");
+        // 是否使用引用计数，默认是启用的。引用计数应该就是第一次请求为1，第二次加1，再一次再加1。
+        // 在释放时，只有引用计数为0时才被视为完全释放（所以要多次调用release）
         lock.setReferenceCounted(true);
         lock.acquire();
 
-        try
-        {
+        try{
             Resources resources = this.getResources();
-            InputStream is = resources.openRawResource(R.raw.key);
-            pk = KeyFactory.getInstance("RSA").generatePrivate(
-                new PKCS8EncodedKeySpec(getByteArrayFromStream(is)));
-        }
-        catch (Exception e)
-        {
+              InputStream is = resources.openRawResource(R.raw.key);
+//
+//            pk = KeyFactory.getInstance("RSA").generatePrivate(
+//                new PKCS8EncodedKeySpec(getByteArrayFromStream(is)));
+//
+        }catch (Exception e){
             throw new IllegalStateException(e);
         }
 
@@ -106,8 +110,7 @@ public class RegisterService extends Service
         {
             public void run()
             {
-                try
-                {
+                try{
                     thread = new RequestListenerThread();
                     thread.setDaemon(false);
                     thread.start();
@@ -120,9 +123,7 @@ public class RegisterService extends Service
                     //
                     //                            raopThread = new LaunchThread(RAOP_PORT);
                     //                            raopThread.start();
-                }
-                catch (IOException e)
-                {
+                }catch (IOException e){
                     e.printStackTrace();
                     Message msg = Message.obtain();
                     msg.what = Constant.Register.FAIL;
@@ -185,12 +186,10 @@ public class RegisterService extends Service
     private void registerAirplay() throws IOException
     {
         Message msg = Message.obtain();
-        if (!getParams())
-        {
+        if (!getParams()){
+            Log.d(TAG,"registerAirplay: Constant.Register.FAIL");
             msg.what = Constant.Register.FAIL;
-        }
-        else
-        {
+        }else{
             register();
             Log.d(tag, "airplay register airplay success");
         }

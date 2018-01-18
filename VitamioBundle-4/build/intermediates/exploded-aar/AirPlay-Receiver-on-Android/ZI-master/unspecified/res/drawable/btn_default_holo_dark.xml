@@ -15,4 +15,4 @@
 		android:drawable="@drawable/btn_default_disabled_focused_holo_dark" />
 	<item android:drawable="@drawable/btn_default_disabled_holo_dark" />
 </selector>
-<!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/drawable/btn_default_holo_dark.xml -->
+<!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/drawable/btn_default_holo_dark.xml -->

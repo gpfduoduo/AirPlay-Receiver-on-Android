@@ -16,4 +16,4 @@
 		<scale android:scaleWidth="100%" android:drawable="@drawable/scrubber_primary_holo" />
 	</item>
 </layer-list>
-<!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/drawable/scrubber_progress_horizontal_holo_dark.xml -->
+<!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/drawable/scrubber_progress_horizontal_holo_dark.xml -->

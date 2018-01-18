@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="F:\android studio\airplay receiver\AirPlay-Receiver-on-Android\VitamioBundle-4\assets"/></dataSet><dataSet config="release"><source path="F:\android studio\airplay receiver\AirPlay-Receiver-on-Android\VitamioBundle-4\build-types\release\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/assets"/></dataSet><dataSet config="release"><source path="/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build-types/release/assets"/></dataSet></merger>

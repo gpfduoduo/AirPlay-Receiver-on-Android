@@ -16,4 +16,4 @@
 		android:drawable="@drawable/scrubber_control_focused_holo" />
 	<item android:drawable="@drawable/scrubber_control_normal_holo" />
 </selector>
-<!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/drawable/scrubber_control_selector_holo.xml --><!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/drawable/scrubber_control_selector_holo.xml -->
+<!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/drawable/scrubber_control_selector_holo.xml --><!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/drawable/scrubber_control_selector_holo.xml -->

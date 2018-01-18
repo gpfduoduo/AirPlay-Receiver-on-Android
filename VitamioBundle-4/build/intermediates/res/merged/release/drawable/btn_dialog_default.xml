@@ -4,4 +4,4 @@
     <item android:drawable="@color/theme_color" android:state_focused="false" android:state_pressed="false" android:state_selected="false"/>
     <item android:drawable="@color/btn_selected_color" android:state_pressed="true" android:state_selected="false"/>
 
-</selector><!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/ZI-master/res/drawable/btn_dialog_default.xml --><!-- From: file:/F:/android%20studio/airplay%20receiver/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/drawable/btn_dialog_default.xml -->
+</selector><!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/ZI-master/res/drawable/btn_dialog_default.xml --><!-- From: file:/media/zwx/work/source/AirPlayReceiverOnAndroid/AirPlay-Receiver-on-Android/VitamioBundle-4/build/intermediates/exploded-aar/AirPlay-Receiver-on-Android/ZI-master/unspecified/res/drawable/btn_dialog_default.xml -->
